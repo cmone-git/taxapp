@@ -147,7 +147,7 @@
                 </div>
 
                 <button onclick="openItrModal()" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-bold py-3.5 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-2">
-                    <i data-lucide="send" class="w-5 h-5"></i> File ITR Now
+                    <i data-lucide="send" class="w-4 h-4"></i> File ITR Now
                 </button>
             </div>
 
@@ -247,11 +247,11 @@
             <!-- Corporate Support Banner -->
             <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 flex items-center justify-between cursor-pointer shadow-lg hover:bg-black transition mt-6" onclick="window.location.href='tel:+919946151111'">
                 <div class="flex items-center gap-5">
-                    <div class="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center text-white border border-gray-700">
+                    <div class="w-14 h-14 rounded-2xl bg-gray-800 flex items-center justify-center text-white border border-gray-700">
                         <i data-lucide="headset" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <h4 class="text-base font-bold text-white">Dedicated Support</h4>
+                        <h4 class="text-lg font-bold text-white">Dedicated Support</h4>
                         <p class="text-sm text-gray-400 mt-1">Connect with your advisor</p>
                     </div>
                 </div>
@@ -478,7 +478,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm text-gray-600 mb-2 font-bold">App No / Ref</label>
-                                <input type="text" id="payAkn" oninput="updatePaymentUI()" class="corp-input uppercase font-mono" placeholder="APPLICATION">
+                                <input type="text" id="payAkn" oninput="updatePaymentUI()" class="corp-input uppercase font-mono text-sm" placeholder="APPLICATION">
                             </div>
                         </div>
                         <div>
@@ -652,7 +652,7 @@
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Transaction Number</p>
                 <p id="successPtrnNo" class="font-mono font-bold text-white text-2xl tracking-wider"></p>
             </div>
-            <button onclick="closePaymentSuccessModal()" class="w-full bg-white text-gray-900 py-4 rounded-2xl font-bold shadow-md hover:bg-gray-100 transition text-base">Done</button>
+            <button onclick="closePaymentSuccessModal()" class="w-full bg-white text-gray-900 py-4 rounded-2xl font-bold shadow-md hover:bg-gray-100 transition text-lg">Done</button>
         </div>
     </div>
 
@@ -691,24 +691,22 @@
         // -------------------------
         // SCRIPT URL 
         // -------------------------
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZg2vw8RUFDQVceBDMFDE-I7vb-BRmIsiHcjvoVs44Z92zOW_sBo44OT__pa1_ivfb/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxY5VHAOIBC2rDv305WJJm-iuKfi9bjxvV-rRhR9E9mJcPeBgMBX6aYw-nbrWcGeQ6C0A/exec';
 
         // -------------------------
         // APP ROUTER (Single Page App)
         // -------------------------
         function goHome() {
             document.querySelectorAll('.page-modal').forEach(m => { m.classList.add('hidden'); m.classList.remove('flex', 'block'); });
-            closeMenu();
             document.getElementById('mainApp').scrollTo(0,0);
         }
 
         // -------------------------
-        // LOCAL STORAGE SESSION & INITIALIZATION
+        // LOCAL STORAGE SESSION
         // -------------------------
         let currentUser = { name: "Guest User", email: "guest@example.com", picture: "" };
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Check for saved session
             const savedSession = localStorage.getItem('taxAppSession');
             if (savedSession) {
                 currentUser = JSON.parse(savedSession);
@@ -765,7 +763,7 @@
             showToast("Successfully Logged In", false, true);
         }
 
-        // Email Login 
+        // Email Login (Simulated / Local save)
         function processEmailLogin() {
             const btn = document.getElementById('btnEmailLogin');
             if (btn.disabled) return;
@@ -835,10 +833,9 @@
         }
 
         function handleLogout() {
-            // Clear Storage
             localStorage.removeItem('taxAppSession');
-            
             currentUser = { name: "Guest User", email: "guest@example.com", picture: "" };
+            
             document.getElementById('navProfileText').innerText = "Login";
             document.getElementById('navName').innerText = currentUser.name;
             document.getElementById('navEmail').innerText = currentUser.email;
@@ -917,8 +914,6 @@
         // -------------------------
         function openLoginModal() { document.getElementById('loginScreen').classList.remove('hidden'); document.getElementById('loginScreen').classList.add('flex'); setTimeout(() => { document.getElementById('loginScreen').style.opacity = '1'; }, 10); }
         function closeLoginModal() { document.getElementById('loginScreen').style.opacity = '0'; setTimeout(() => { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('flex'); }, 300); }
-        function openMenu() { document.getElementById('sideMenu').classList.remove('hidden'); document.getElementById('sideMenu').classList.add('block'); }
-        function closeMenu() { document.getElementById('sideMenu').classList.add('hidden'); document.getElementById('sideMenu').classList.remove('block'); }
         function openPaymentSuccessModal() { document.getElementById('paymentSuccessModal').classList.remove('hidden'); document.getElementById('paymentSuccessModal').classList.add('flex'); }
         function closePaymentSuccessModal() { document.getElementById('paymentSuccessModal').classList.add('hidden'); document.getElementById('paymentSuccessModal').classList.remove('flex'); }
         function closeItrSuccessModal() { document.getElementById('itrSuccessModal').classList.add('hidden'); document.getElementById('itrSuccessModal').classList.remove('flex'); }
@@ -988,6 +983,12 @@
             setTimeout(() => { circle.style.strokeDashoffset = offset; }, 100);
         }
 
+        let currentItrAppNo = '';
+        function whatsappITR() {
+            const text = encodeURIComponent(`Hello, I have successfully submitted my ITR Details.\n\n*Application No:* ${currentItrAppNo}\n\nPlease process this fast 🚀.`);
+            window.open(`https://wa.me/919946151111?text=${text}`, '_blank');
+        }
+
         // ITR FORM
         let currentStep = 1;
         function openItrModal() { 
@@ -1038,12 +1039,13 @@
             btn.disabled = true; lucide.createIcons();
 
             try {
-                // Fixed Base64 string cell length crash. Now securely sends filenames.
+                // Now safely passing only filenames to avoid Base64 payload crash
                 const bankFile = processFile('s3_bank'); const form16File = processFile('s3_form16');
                 const pnlFile = processFile('s3_pnl'); const othersFile = processFile('s3_others');
 
                 const now = new Date();
                 const appNo = `ITR4${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+                currentItrAppNo = appNo;
                 
                 document.getElementById('payPan').value = document.getElementById('s1_pan').value.toUpperCase();
                 document.getElementById('payMobile').value = document.getElementById('s1_mobile').value;
@@ -1087,7 +1089,7 @@
             const mobile = document.getElementById('payMobile').value;
             
             if(!amt || !name || !pan || !mobile) {
-                showToast("Please fill all mandatory fields.", true);
+                showToast("Please fill all mandatory fields (*).", true);
                 return;
             }
 
