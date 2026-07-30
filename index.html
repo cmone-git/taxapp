@@ -86,7 +86,6 @@
     <!-- Fixed Sticky Header (Height 64px, Larger Icons & Text) -->
     <header class="fixed top-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 h-[64px] px-5 flex justify-between items-center">
         <div class="flex items-center">
-            <!-- Header Logo (1x3) -->
             <img src="assets/name.png" alt="CM TaxApp" class="h-9 object-contain cursor-pointer" onclick="goHome()">
         </div>
         <div class="flex items-center gap-3">
@@ -151,7 +150,7 @@
                 </button>
             </div>
 
-            <!-- Quick Tools Grid (Larger Readability) -->
+            <!-- Quick Tools Grid -->
             <div>
                 <h3 class="text-xl font-bold text-gray-900 mb-5 px-1">Quick Tools</h3>
                 <div class="grid grid-cols-2 gap-4 gap-y-7 pt-1">
@@ -583,13 +582,13 @@
         </div>
         <div class="p-6 bg-brand-bg flex-grow">
             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-5 max-w-[600px] mx-auto pt-5">
-                <input type="text" class="corp-input text-lg" placeholder="PAN or Application No" required>
+                <input type="text" id="uploadAppNo" class="corp-input text-lg" placeholder="PAN or Application No" required>
                 <div class="file-upload-wrapper !py-12">
                     <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-gray-500 mb-3"></i>
                     <span class="text-base font-bold block text-gray-700">Tap to select file</span>
-                    <input type="file" required>
+                    <input type="file" id="uploadDocFile" required>
                 </div>
-                <button onclick="goHome(); showToast('Document Uploaded!', false, true);" class="w-full bg-gray-900 hover:bg-black transition text-white font-bold py-4 rounded-xl shadow-md text-base mt-2">Upload</button>
+                <button onclick="submitUploadModal()" id="uploadSubmitBtn" class="w-full bg-gray-900 hover:bg-black transition text-white font-bold py-4 rounded-xl shadow-md text-base mt-2">Upload</button>
             </div>
         </div>
     </div>
@@ -703,6 +702,28 @@
         }
 
         // -------------------------
+        // SEQUENTIAL NUMBER GENERATORS (ITR & TRN)
+        // -------------------------
+        function getNextItrAppNo() {
+            let lastNo = parseInt(localStorage.getItem('itrLastSeq') || "0", 10);
+            lastNo++;
+            localStorage.setItem('itrLastSeq', lastNo.toString());
+            const now = new Date();
+            const yy = String(now.getFullYear()).slice(-2);
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const seqStr = String(lastNo).padStart(3, '0');
+            return `ITR4${yy}${mm}${seqStr}`;
+        }
+
+        function getNextTrnNo() {
+            let lastNo = parseInt(localStorage.getItem('trnLastSeq') || "0", 10);
+            lastNo++;
+            localStorage.setItem('trnLastSeq', lastNo.toString());
+            const seqStr = String(lastNo).padStart(3, '0');
+            return `TRN4${seqStr}`;
+        }
+
+        // -------------------------
         // LOCAL STORAGE SESSION & INITIALIZATION
         // -------------------------
         let currentUser = { name: "Guest User", email: "guest@example.com", picture: "" };
@@ -771,7 +792,6 @@
             const pass = (document.getElementById('loginPassword').value || "").trim();
             const rememberMe = document.getElementById('rememberMeCheckbox').checked;
 
-            // Strict Email Domain Check
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!email || !emailRegex.test(email)) { 
                 showToast("Please enter a valid full email address (e.g., name@gmail.com)", true); 
@@ -900,7 +920,7 @@
                                             <i data-lucide="file-check" class="w-7 h-7"></i>
                                         </div>
                                         <div>
-                                            <h4 class="text-base font-bold text-gray-900">${item.Type}</h4>
+                                            <h4 class="text-base font-bold text-gray-900">${item.FY} - ${item.HeadOfIncome}</h4>
                                             <p class="text-xs text-gray-500 font-mono mt-0.5">${item.AppNo}</p>
                                         </div>
                                     </div>
@@ -1080,8 +1100,7 @@
                 const pnlFile = await processFileInput('s3_pnl');
                 const othersFile = await processFileInput('s3_others');
 
-                const now = new Date();
-                const appNo = `ITR4${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+                const appNo = getNextItrAppNo();
                 currentItrAppNo = appNo;
                 
                 document.getElementById('payPan').value = document.getElementById('s1_pan').value.toUpperCase();
@@ -1136,27 +1155,47 @@
 
             try {
                 const payProof = await processFileInput('payProof');
-                const now = new Date();
-                const ptrnNo = `PTRN${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+                const ptrnSeq = getNextTrnNo();
                 
                 const userAkn = document.getElementById('payAkn').value;
-                const finalAkn = userAkn ? `${userAkn} / ${ptrnNo}` : ptrnNo;
+                const finalAkn = userAkn ? `${ptrnSeq}/${userAkn}` : ptrnSeq;
 
                 const payload = {
-                    "action": 'PAYMENT', "#TimeStamp": now.toISOString(), "Name": name, 
+                    "action": 'PAYMENT', "#TimeStamp": new Date().toISOString(), "Name": name, 
                     "PAN": pan, "Mobile": mobile, "AKN": finalAkn, "Amount": amt, "PaymentProof": payProof
                 };
 
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
                     .then(() => { 
-                        closePaymentModal(); document.getElementById('successPtrnNo').innerText = ptrnNo; openPaymentSuccessModal(); 
+                        closePaymentModal(); document.getElementById('successPtrnNo').innerText = finalAkn; openPaymentSuccessModal(); 
                         btn.disabled = false; btn.innerHTML = origText; lucide.createIcons();
                     })
                     .catch(() => { 
-                        closePaymentModal(); document.getElementById('successPtrnNo').innerText = ptrnNo; openPaymentSuccessModal(); 
+                        closePaymentModal(); document.getElementById('successPtrnNo').innerText = finalAkn; openPaymentSuccessModal(); 
                         btn.disabled = false; btn.innerHTML = origText; lucide.createIcons();
                     });
             } catch(e) { showToast("Error processing payment request.", true); btn.disabled = false; btn.innerHTML = origText; lucide.createIcons(); } 
+        }
+
+        async function submitUploadModal() {
+            const btn = document.getElementById('uploadSubmitBtn');
+            if(btn.disabled) return;
+            const appNo = document.getElementById('uploadAppNo').value.trim();
+            const fileInput = document.getElementById('uploadDocFile');
+            if(!appNo || !fileInput.files.length) {
+                showToast("Please provide Application No and choose a file", true);
+                return;
+            }
+            const origText = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Uploading...`;
+            btn.disabled = true; lucide.createIcons();
+            try {
+                const docFile = await readFileAsBase64(fileInput.files[0]);
+                const payload = { "action": "UPLOAD", "ApplicationNo": appNo, "DocumentFile": docFile };
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
+                    .then(() => { goHome(); showToast('Document Uploaded!', false, true); btn.disabled = false; btn.innerHTML = origText; lucide.createIcons(); })
+                    .catch(() => { goHome(); showToast('Document Uploaded!', false, true); btn.disabled = false; btn.innerHTML = origText; lucide.createIcons(); });
+            } catch(e) { showToast("Error uploading document", true); btn.disabled = false; btn.innerHTML = origText; lucide.createIcons(); }
         }
 
         function copyText(text) { navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard!", false, false)); }
