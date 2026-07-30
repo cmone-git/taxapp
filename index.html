@@ -71,19 +71,16 @@
         .toast.success { background: #10B981; }
         .toast.error { background: #EF4444; }
         .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
-        
-        .bank-details-wrapper { transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out; max-height: 0; opacity: 0; overflow: hidden; }
-        .bank-details-wrapper.expanded { max-height: 400px; opacity: 1; }
     </style>
 </head>
 <body class="font-sans text-brand-text min-h-screen flex flex-col relative overflow-x-hidden">
 
-    <!-- Splash Screen (1x3 Logo) -->
+    <!-- Splash Screen -->
     <div id="splash" class="fixed inset-0 z-[200] bg-[#f8fafc] flex flex-col items-center justify-center transition-opacity duration-500">
         <img src="assets/name.png" alt="CM TaxApp" class="w-64 h-auto animate-pulse object-contain">
     </div>
 
-    <!-- Fixed Sticky Header (Height 64px, Larger Icons & Text) -->
+    <!-- Fixed Sticky Header -->
     <header class="fixed top-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 h-[64px] px-5 flex justify-between items-center">
         <div class="flex items-center">
             <img src="assets/name.png" alt="CM TaxApp" class="h-9 object-contain cursor-pointer" onclick="goHome()">
@@ -111,9 +108,15 @@
             <div>
                 <div class="flex items-center gap-2 mb-1">
                     <span class="text-3xl leading-none">👋</span>
-                    <h1 class="text-[32px] font-black text-gray-900 tracking-tight leading-none">Welcome Back</h1>
+                    <h1 id="welcomeHeading" class="text-[32px] font-black text-gray-900 tracking-tight leading-none truncate">Welcome Back</h1>
                 </div>
                 <p class="text-sm text-gray-500 font-semibold pl-1.5">File your Taxes with Confidence.</p>
+            </div>
+
+            <!-- Recent Status Dashboard Widget (Dynamically Loaded) -->
+            <div id="dashboardStatusContainer" class="hidden">
+                <h3 class="text-xl font-bold text-gray-900 mb-3 px-1">Recent Status</h3>
+                <div id="dashboardStatusContent"></div>
             </div>
 
             <!-- Due Date Reminder Card -->
@@ -201,48 +204,6 @@
                 </div>
             </div>
 
-            <!-- Dashboard Tax Updates Section -->
-            <div>
-                <div class="flex justify-between items-center mb-5 px-1">
-                    <h3 class="text-xl font-bold text-gray-900">Tax Updates</h3>
-                    <a href="taxupdates.html" class="text-sm font-bold text-gray-700 hover:text-black transition">View All</a>
-                </div>
-                
-                <div class="space-y-4">
-                    <a href="taxupdates.html" class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 flex items-center justify-between gap-4 hover:shadow-md transition group">
-                        <div class="flex items-center gap-4 overflow-hidden pl-1">
-                            <div class="w-12 h-12 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="clipboard-list" class="w-6 h-6 text-gray-600"></i>
-                            </div>
-                            <div class="truncate">
-                                <h4 class="text-base font-bold text-gray-900 truncate mb-0.5">ITR Due Date for Individual</h4>
-                                <p class="text-sm text-gray-500 truncate">AY 2026-27 filing deadline details</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 flex-shrink-0 pr-1">
-                            <span class="text-xs font-bold text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">Jul 31, 2026</span>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform"></i>
-                        </div>
-                    </a>
-
-                    <a href="taxupdates.html" class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 flex items-center justify-between gap-4 hover:shadow-md transition group">
-                        <div class="flex items-center gap-4 overflow-hidden pl-1">
-                            <div class="w-12 h-12 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="search-check" class="w-6 h-6 text-gray-600"></i>
-                            </div>
-                            <div class="truncate">
-                                <h4 class="text-base font-bold text-gray-900 truncate mb-0.5">Tax Audit Due Date</h4>
-                                <p class="text-sm text-gray-500 truncate">Form 3CD report upload schedule</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 flex-shrink-0 pr-1">
-                            <span class="text-xs font-bold text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">Sep 30, 2026</span>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition-transform"></i>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
             <!-- Corporate Support Banner -->
             <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 flex items-center justify-between cursor-pointer shadow-lg hover:bg-black transition mt-6" onclick="window.location.href='tel:+919946151111'">
                 <div class="flex items-center gap-5">
@@ -259,7 +220,7 @@
         </main>
     </div>
 
-    <!-- Fixed Full-Length Bottom Navigation Bar (Height 64px, Larger Typography) -->
+    <!-- Fixed Full-Length Bottom Navigation Bar -->
     <nav class="fixed bottom-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md border-t border-gray-200 px-6 h-[64px] flex justify-between items-center pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <a href="#" onclick="goHome()" class="flex flex-col items-center gap-1.5 text-gray-900 w-16">
             <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
@@ -279,10 +240,6 @@
         </a>
     </nav>
 
-    <!-- ========================================== -->
-    <!-- ALL PAGE MODALS (Fit Between Top 64px and Bottom 64px) -->
-    <!-- ========================================== -->
-
     <!-- MY FILINGS / USER DASHBOARD MODAL -->
     <div id="myFilingsModal" class="page-modal fixed top-[64px] bottom-[64px] left-0 w-full z-[50] hidden flex-col bg-[#F8FAFC]">
         <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center bg-white shadow-sm">
@@ -291,10 +248,7 @@
         </div>
         <div class="overflow-y-auto no-scrollbar p-5 flex-grow">
             <div class="max-w-[600px] mx-auto space-y-4 pt-2" id="myFilingsContainer">
-                <div class="flex flex-col items-center justify-center py-20 text-gray-400">
-                    <i data-lucide="loader-2" class="w-8 h-8 animate-spin mb-4"></i>
-                    <p class="text-base font-semibold">Loading your records...</p>
-                </div>
+                <!-- Dynamically Populated -->
             </div>
         </div>
     </div>
@@ -305,7 +259,6 @@
         <div class="absolute inset-y-0 left-0 w-[80%] max-w-sm bg-white shadow-2xl flex flex-col animate-[slideRight_0.2s_ease-out]">
             <div class="px-6 py-8 border-b border-gray-100 bg-white flex justify-between items-start">
                 <div>
-                    <!-- 1x1 Avatar -->
                     <img id="navAvatar" src="assets/logo.png" class="w-16 h-16 rounded-2xl border border-gray-200 object-contain bg-white p-1 hidden mb-3" alt="Profile">
                     <div id="navInitials" class="w-16 h-16 bg-gray-50 rounded-2xl border border-gray-200 flex items-center justify-center text-gray-900 mb-3 shadow-sm font-bold text-2xl">GU</div>
                     <h2 id="navName" class="text-lg font-bold text-gray-900 leading-tight">Guest User</h2>
@@ -347,7 +300,7 @@
         </div>
     </div>
 
-    <!-- 1. ITR FORM MODAL -->
+    <!-- ITR FORM MODAL -->
     <div id="itrModal" class="page-modal fixed top-[64px] bottom-[64px] left-0 w-full z-[50] hidden flex-col bg-white">
         <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center bg-white shadow-sm">
             <h3 class="font-bold text-xl text-gray-900">File ITR</h3>
@@ -458,7 +411,7 @@
         </div>
     </div>
 
-    <!-- 2. PAYMENT MODAL -->
+    <!-- PAYMENT MODAL -->
     <div id="paymentModal" class="page-modal fixed top-[64px] bottom-[64px] left-0 w-full z-[50] hidden flex-col bg-[#F8FAFC]">
         <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center bg-white shadow-sm">
             <h3 class="font-bold text-xl text-gray-900">Payment Portal</h3>
@@ -604,7 +557,6 @@
             <h1 class="text-3xl font-black text-gray-900 tracking-tight mb-2">Welcome Back</h1>
             <p class="text-gray-500 text-base mb-8 text-center leading-relaxed">Sign in to your dashboard securely.</p>
 
-            <!-- Standard Email & Password UI -->
             <div class="w-full space-y-5 mb-6">
                 <input type="email" id="loginEmail" class="corp-input bg-gray-50" placeholder="Email Address">
                 <div class="relative">
@@ -637,7 +589,7 @@
         </div>
     </div>
 
-    <!-- PAYMENT INITIATED SUCCESS MODAL (TRN GENERATED) OVERLAY -->
+    <!-- PAYMENT INITIATED SUCCESS MODAL OVERLAY -->
     <div id="paymentSuccessModal" class="fixed inset-0 z-[150] hidden flex-col bg-gray-900/80 backdrop-blur-sm justify-center items-center px-5 transition-opacity">
         <div class="bg-[#1F2937] border border-gray-700 rounded-[32px] w-full max-w-[360px] p-8 shadow-2xl flex flex-col items-center animate-[zoomIn_0.3s_ease-out]">
             <div class="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 mb-6 border-2 border-blue-500/50">
@@ -687,54 +639,34 @@
     <script>
         lucide.createIcons();
 
-        // -------------------------
-        // SCRIPT URL 
-        // -------------------------
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxY5VHAOIBC2rDv305WJJm-iuKfi9bjxvV-rRhR9E9mJcPeBgMBX6aYw-nbrWcGeQ6C0A/exec';
 
-        // -------------------------
-        // APP ROUTER (Single Page App)
-        // -------------------------
+        // ROUTER
         function goHome() {
             document.querySelectorAll('.page-modal').forEach(m => { m.classList.add('hidden'); m.classList.remove('flex', 'block'); });
-            closeMenu();
-            document.getElementById('mainApp').scrollTo(0,0);
+            closeMenu(); document.getElementById('mainApp').scrollTo(0,0);
         }
 
-        // -------------------------
-        // SEQUENTIAL NUMBER GENERATORS (ITR & TRN)
-        // -------------------------
+        // SEQ NUMBERS - Exact Logic: ITR 4 26 4 0001
         function getNextItrAppNo() {
             let lastNo = parseInt(localStorage.getItem('itrLastSeq') || "0", 10);
-            lastNo++;
-            localStorage.setItem('itrLastSeq', lastNo.toString());
-            const now = new Date();
-            const yy = String(now.getFullYear()).slice(-2);
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const seqStr = String(lastNo).padStart(3, '0');
-            return `ITR4${yy}${mm}${seqStr}`;
+            lastNo++; localStorage.setItem('itrLastSeq', lastNo.toString());
+            const yy = String(new Date().getFullYear()).slice(-2); // e.g. "26"
+            return `ITR4${yy}4${String(lastNo).padStart(4, '0')}`;
         }
 
         function getNextTrnNo() {
             let lastNo = parseInt(localStorage.getItem('trnLastSeq') || "0", 10);
-            lastNo++;
-            localStorage.setItem('trnLastSeq', lastNo.toString());
-            const seqStr = String(lastNo).padStart(3, '0');
-            return `TRN4${seqStr}`;
+            lastNo++; localStorage.setItem('trnLastSeq', lastNo.toString());
+            return `TRN4${String(lastNo).padStart(3, '0')}`;
         }
 
-        // -------------------------
-        // LOCAL STORAGE SESSION & INITIALIZATION
-        // -------------------------
+        // LOCAL STORAGE
         let currentUser = { name: "Guest User", email: "guest@example.com", picture: "" };
 
         document.addEventListener('DOMContentLoaded', () => {
             const savedSession = localStorage.getItem('taxAppSession');
-            if (savedSession) {
-                currentUser = JSON.parse(savedSession);
-                populateUserData();
-            }
-
+            if (savedSession) { currentUser = JSON.parse(savedSession); populateUserData(); }
             setTimeout(() => {
                 const splash = document.getElementById('splash');
                 if (splash) { splash.style.opacity = "0"; setTimeout(() => splash.remove(), 500); }
@@ -742,62 +674,47 @@
             }, 1000);
         });
 
-        // -------------------------
         // GOOGLE LOGIN
-        // -------------------------
         const GOOGLE_CLIENT_ID = "753272952222-c1pgj8cb8g7vte82sp6kevd3mku17cca.apps.googleusercontent.com"; 
-
         window.onload = function () {
             try {
                 if(typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-                    google.accounts.id.initialize({
-                        client_id: GOOGLE_CLIENT_ID,
-                        callback: handleCredentialResponse,
-                        cancel_on_tap_outside: false
-                    });
-                    google.accounts.id.renderButton(
-                        document.getElementById("googleAuthContainer"),
-                        { theme: "outline", size: "large", width: 280, text: "continue_with" }
-                    );
+                    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse, cancel_on_tap_outside: false });
+                    google.accounts.id.renderButton(document.getElementById("googleAuthContainer"), { theme: "outline", size: "large", width: 280, text: "continue_with" });
                 }
-            } catch (error) { console.warn("Google Sign-In disabled due to local environment constraints."); }
+            } catch (error) { console.warn("Google Sign-In disabled."); }
         };
 
         function parseJwt (token) {
-            var base64Url = token.split('.')[1];
-            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var base64Url = token.split('.')[1]; var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload);
+            }).join('')); return JSON.parse(jsonPayload);
         }
 
         function handleCredentialResponse(response) {
             const data = parseJwt(response.credential);
-            currentUser.name = data.name;
-            currentUser.email = data.email;
-            currentUser.picture = data.picture;
-            
+            currentUser.name = data.name; currentUser.email = data.email; currentUser.picture = data.picture;
             localStorage.setItem('taxAppSession', JSON.stringify(currentUser));
-            
             populateUserData(); closeLoginModal(); logUserSignIn(currentUser.name, currentUser.email);
             showToast("Successfully Logged In", false, true);
         }
 
-        // Email Login with Strict Validation and Session Caching
+        // 1. SECURE EMAIL LOGIN
         function processEmailLogin() {
             const btn = document.getElementById('btnEmailLogin');
             if (btn.disabled) return;
+            
             const email = (document.getElementById('loginEmail').value || "").trim();
             const pass = (document.getElementById('loginPassword').value || "").trim();
             const rememberMe = document.getElementById('rememberMeCheckbox').checked;
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!email || !emailRegex.test(email)) { 
-                showToast("Please enter a valid full email address (e.g., name@gmail.com)", true); 
+                showToast("Please enter a valid full email address", true); 
                 return; 
             }
-            if (!pass) {
+            if (!pass) { 
                 showToast("Please enter your password", true); 
                 return; 
             }
@@ -806,21 +723,23 @@
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Signing In...`;
             lucide.createIcons();
             
-            setTimeout(() => {
-                currentUser.name = email.split('@')[0];
-                currentUser.email = email.toLowerCase();
-                
-                if (rememberMe) {
-                    localStorage.setItem('taxAppSession', JSON.stringify(currentUser));
-                }
-
-                populateUserData();
-                closeLoginModal();
-                logUserSignIn(currentUser.name, currentUser.email);
-                showToast("Successfully Logged In", false, true);
-                btn.disabled = false;
-                btn.innerHTML = "Sign In";
-            }, 1000);
+            fetch(`${SCRIPT_URL}?action=VERIFY_LOGIN&email=${encodeURIComponent(email)}&password=${encodeURIComponent(pass)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.valid) {
+                        currentUser.name = data.name;
+                        currentUser.email = email.toLowerCase();
+                        if (rememberMe) localStorage.setItem('taxAppSession', JSON.stringify(currentUser));
+                        populateUserData();
+                        closeLoginModal();
+                        logUserSignIn(currentUser.name, currentUser.email);
+                        showToast("Successfully Logged In", false, true);
+                    } else {
+                        showToast("Invalid Email or Password", true);
+                    }
+                })
+                .catch(() => showToast("Error connecting to server", true))
+                .finally(() => { btn.disabled = false; btn.innerHTML = "Sign In"; lucide.createIcons(); });
         }
 
         function togglePassword(inputId, iconId) {
@@ -831,17 +750,22 @@
         }
 
         function logUserSignIn(name, email) {
-            const payload = { "action": "USER_LOGIN", "#TimeStamp": new Date().toISOString(), "Name": name, "Email": email };
+            const payload = { "action": "USER_LOGIN", "Name": name, "Email": email };
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' }).catch(err => console.error(err));
         }
 
         function populateUserData() {
             if(currentUser.name !== "Guest User") {
                 document.getElementById('navProfileText').innerText = "Profile";
+                document.getElementById('welcomeHeading').innerText = "Welcome Back, " + currentUser.name.split(' ')[0];
+                fetchDashboardStatus();
+            } else {
+                document.getElementById('welcomeHeading').innerText = "Welcome Back";
+                document.getElementById('dashboardStatusContainer').classList.add('hidden');
             }
+
             document.getElementById('s1_name').value = currentUser.name !== "Guest User" ? currentUser.name : "";
             document.getElementById('s1_email').value = currentUser.email !== "guest@example.com" ? currentUser.email : "";
-
             const initials = currentUser.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
             
             if(currentUser.picture) {
@@ -864,7 +788,6 @@
         function handleLogout() {
             localStorage.removeItem('taxAppSession');
             currentUser = { name: "Guest User", email: "guest@example.com", picture: "" };
-            
             document.getElementById('navProfileText').innerText = "Login";
             document.getElementById('navName').innerText = currentUser.name;
             document.getElementById('navEmail').innerText = currentUser.email;
@@ -877,15 +800,68 @@
             document.getElementById('navSignOutBtn').classList.add('hidden');
             document.getElementById('navSignOutBtn').classList.remove('flex');
             
-            goHome();
-            showToast("Logged out successfully");
+            document.getElementById('welcomeHeading').innerText = "Welcome Back";
+            document.getElementById('dashboardStatusContainer').classList.add('hidden');
+            
+            goHome(); showToast("Logged out successfully");
         }
 
         function handleProfileClick() { goHome(); if(currentUser.email !== "guest@example.com") { openMyFilingsModal(); } else { openLoginModal(); } }
 
-        // -------------------------
-        // MY FILINGS FETCH LOGIC
-        // -------------------------
+        // Fetch Dashboard Status
+        function fetchDashboardStatus() {
+            const container = document.getElementById('dashboardStatusContainer');
+            const content = document.getElementById('dashboardStatusContent');
+            container.classList.remove('hidden');
+            content.innerHTML = `<p class="text-sm text-gray-500 font-medium flex items-center gap-2 mb-4"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Checking recent status...</p>`;
+            lucide.createIcons();
+            
+            fetch(`${SCRIPT_URL}?action=GET_USER_DATA&email=${encodeURIComponent(currentUser.email)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const item = data[0]; 
+                        let compStatus = item.Status === "Completed" && item.AknNo ? `Completed (AKN: ${item.AknNo})` : item.Status;
+                        let isDue = !isNaN(parseFloat(item.PaymentStatus)) && parseFloat(item.PaymentStatus) > 0;
+                        let payStatusText = isDue ? `Due Rs. ${parseFloat(item.PaymentStatus).toFixed(2)}` : item.PaymentStatus;
+                        
+                        let payBtn = isDue ? `<button onclick="payDue('${item.AppNo}', '${item.PaymentStatus}')" class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 transition shadow-sm w-full mt-2">Pay Due Now</button>` : '';
+
+                        content.innerHTML = `
+                            <div class="bg-white rounded-[24px] p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-3">
+                                <div class="flex justify-between items-center border-b border-gray-50 pb-3">
+                                    <span class="text-sm font-bold text-gray-900">${item.FY} - ${item.HeadOfIncome}</span>
+                                    <span class="text-xs font-mono text-gray-500 bg-gray-50 px-2 py-1 rounded">${item.AppNo}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Compliance</span>
+                                    <span class="text-sm font-bold text-gray-900">${compStatus}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</span>
+                                    <span class="text-sm font-bold ${isDue ? 'text-red-600' : 'text-green-600'}">${payStatusText}</span>
+                                </div>
+                                ${payBtn}
+                            </div>
+                        `;
+                    } else {
+                        content.innerHTML = `<p class="text-sm text-gray-500 font-medium mb-4">No recent filings found.</p>`;
+                    }
+                })
+                .catch(() => { content.innerHTML = `<p class="text-sm text-red-500 font-medium mb-4">Failed to load status.</p>`; });
+        }
+
+        // Dedicated Payment Navigation
+        function payDue(appNo, amount) {
+            document.querySelectorAll('.page-modal').forEach(m => { m.classList.add('hidden'); m.classList.remove('flex', 'block'); });
+            openPaymentModal();
+            document.getElementById('payAkn').value = appNo;
+            document.getElementById('payAmount').value = parseFloat(amount).toFixed(2);
+            document.getElementById('payName').value = currentUser.name !== "Guest User" ? currentUser.name : "";
+            updatePaymentUI();
+        }
+
+        // 6. MY FILINGS (FIXED ALIGNMENT AS PER 1000828759.jpg)
         function openMyFilingsModal() {
             goHome(); document.getElementById('myFilingsModal').classList.remove('hidden'); document.getElementById('myFilingsModal').classList.add('flex');
             const container = document.getElementById('myFilingsContainer');
@@ -913,20 +889,37 @@
                         container.innerHTML = '';
                         data.forEach(item => {
                             const dateStr = new Date(item.Date).toLocaleDateString('en-IN', {day: 'numeric', month:'short', year:'numeric'});
+                            let compStatus = item.Status === "Completed" && item.AknNo ? `Completed (AKN: ${item.AknNo})` : item.Status;
+                            let isDue = !isNaN(parseFloat(item.PaymentStatus)) && parseFloat(item.PaymentStatus) > 0;
+                            let payStatusText = isDue ? `Due Rs. ${parseFloat(item.PaymentStatus).toFixed(2)}` : item.PaymentStatus;
+                            let payBtn = isDue ? `<button onclick="payDue('${item.AppNo}', '${item.PaymentStatus}')" class="mt-2 text-xs font-bold bg-indigo-600 text-white px-3 py-2 rounded-lg shadow-sm hover:bg-indigo-700 transition w-full text-center">Pay Due Now</button>` : '';
+
+                            // Updated Card Layout fixing the squished horizontal layout issue
                             const card = `
-                                <div class="bg-white p-5 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between gap-4">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                                            <i data-lucide="file-check" class="w-7 h-7"></i>
+                                <div class="bg-white p-5 rounded-[20px] shadow-sm border border-gray-100 flex flex-col gap-4 relative">
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
+                                            <i data-lucide="file-check" class="w-6 h-6"></i>
                                         </div>
-                                        <div>
-                                            <h4 class="text-base font-bold text-gray-900">${item.FY} - ${item.HeadOfIncome}</h4>
-                                            <p class="text-xs text-gray-500 font-mono mt-0.5">${item.AppNo}</p>
+                                        <div class="flex-grow pr-2">
+                                            <h4 class="text-sm font-bold text-gray-900 leading-tight">${item.FY} - ${item.HeadOfIncome}</h4>
+                                            <p class="text-xs text-gray-500 font-mono mt-1 bg-gray-50 inline-block px-1.5 py-0.5 rounded">${item.AppNo}</p>
                                         </div>
                                     </div>
-                                    <div class="text-right flex flex-col items-end">
-                                        <span class="text-[10px] font-bold text-yellow-600 bg-yellow-50 px-2.5 py-1 rounded-md uppercase tracking-widest mb-1">${item.Status}</span>
-                                        <span class="text-xs text-gray-400 font-medium">${dateStr}</span>
+                                    
+                                    <div class="bg-gray-50 rounded-xl p-3 flex flex-col gap-2">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Compliance</span>
+                                            <span class="text-xs font-bold text-gray-900 text-right">${compStatus}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Payment</span>
+                                            <span class="text-xs font-bold ${isDue ? 'text-red-600' : 'text-gray-900'} text-right">${payStatusText}</span>
+                                        </div>
+                                        ${payBtn}
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-[10px] text-gray-400 font-medium">${dateStr}</span>
                                     </div>
                                 </div>
                             `;
@@ -938,9 +931,7 @@
                 .catch(err => { container.innerHTML = `<p class="text-center text-base text-red-500 font-bold py-10">Error loading data. Please try again later.</p>`; });
         }
 
-        // -------------------------
-        // MODALS & UTILS
-        // -------------------------
+        // MODALS
         function openLoginModal() { document.getElementById('loginScreen').classList.remove('hidden'); document.getElementById('loginScreen').classList.add('flex'); setTimeout(() => { document.getElementById('loginScreen').style.opacity = '1'; }, 10); }
         function closeLoginModal() { document.getElementById('loginScreen').style.opacity = '0'; setTimeout(() => { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('flex'); }, 300); }
         function openMenu() { document.getElementById('sideMenu').classList.remove('hidden'); document.getElementById('sideMenu').classList.add('block'); }
@@ -948,7 +939,6 @@
         function openPaymentSuccessModal() { document.getElementById('paymentSuccessModal').classList.remove('hidden'); document.getElementById('paymentSuccessModal').classList.add('flex'); }
         function closePaymentSuccessModal() { document.getElementById('paymentSuccessModal').classList.add('hidden'); document.getElementById('paymentSuccessModal').classList.remove('flex'); }
         function closeItrSuccessModal() { document.getElementById('itrSuccessModal').classList.add('hidden'); document.getElementById('itrSuccessModal').classList.remove('flex'); }
-        
         function openSearch() { goHome(); document.getElementById('searchModal').classList.remove('hidden'); document.getElementById('searchModal').classList.add('flex'); document.getElementById('searchInput').focus(); }
         function closeSearch() { document.getElementById('searchModal').classList.add('hidden'); document.getElementById('searchModal').classList.remove('flex'); }
         function openPaymentModal() { goHome(); document.getElementById('paymentModal').classList.remove('hidden'); document.getElementById('paymentModal').classList.add('flex'); }
@@ -961,8 +951,7 @@
             if (isError) { toast.classList.add('error'); toast.innerHTML = `<i data-lucide="alert-circle" class="w-6 h-6"></i> <span>${message}</span>`; } 
             else if (isSuccessGreen) { toast.classList.add('success'); toast.innerHTML = `<i data-lucide="check-circle" class="w-6 h-6"></i> <span>${message}</span>`; } 
             else { toast.classList.add('default'); toast.innerHTML = `<i data-lucide="info" class="w-6 h-6 text-white"></i> <span>${message}</span>`; }
-            lucide.createIcons();
-            toast.classList.add('show');
+            lucide.createIcons(); toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
@@ -975,7 +964,7 @@
             });
         }
 
-        // PAYMENT LOGIC
+        // PAYMENT UI
         function updatePaymentUI() {
             let amt = parseFloat(document.getElementById('payAmount').value) || 0;
             let total = amt + (amt * 0.02); 
@@ -1023,8 +1012,7 @@
         // ITR FORM
         let currentStep = 1;
         function openItrModal() { 
-            goHome();
-            document.getElementById('itrForm').classList.remove('hidden'); document.getElementById('itrForm').classList.add('block');
+            goHome(); document.getElementById('itrForm').classList.remove('hidden'); document.getElementById('itrForm').classList.add('block');
             document.getElementById('itrModalNav').classList.remove('hidden'); document.getElementById('itrModalNav').classList.add('flex');
             document.getElementById('itrModalFooter').classList.remove('hidden'); document.getElementById('itrModalFooter').classList.add('block');
             document.getElementById('itrModal').classList.remove('hidden'); document.getElementById('itrModal').classList.add('flex'); 
@@ -1052,49 +1040,64 @@
         function readFileAsBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve({
-                    base64: reader.result.split(',')[1],
-                    mimeType: file.type,
-                    fileName: file.name
-                });
-                reader.onerror = error => reject(error);
-                reader.readAsDataURL(file);
+                reader.onload = () => resolve({ base64: reader.result.split(',')[1], mimeType: file.type, fileName: file.name });
+                reader.onerror = error => reject(error); reader.readAsDataURL(file);
             });
         }
 
         async function processFileInput(inputId) {
             const fileInput = document.getElementById(inputId);
             if (fileInput && fileInput.files.length > 0) {
-                try {
-                    return await readFileAsBase64(fileInput.files[0]);
-                } catch(e) {
-                    return "Error Reading File";
-                }
-            }
-            return null;
+                try { return await readFileAsBase64(fileInput.files[0]); } catch(e) { return "Error Reading File"; }
+            } return null;
         }
 
+        // 3, 5. FINAL ITR SUBMIT + DUPLICATE CHECK
         async function submitItrFinal() {
             const btn = document.getElementById('btnSubmit'); 
             if (btn.disabled) return;
             
-            const emailVal = (document.getElementById('s1_email').value || "").trim();
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            if(!document.getElementById('s1_name').value || !document.getElementById('s1_pan').value || !emailVal || !document.getElementById('s1_mobile').value || !document.getElementById('s2_fy').value || !document.getElementById('s2_head').value) {
-                showToast("Please complete all mandatory fields (*).", true, false); 
+            const nameVal = document.getElementById('s1_name').value.trim();
+            const emailVal = document.getElementById('s1_email').value.trim().toLowerCase();
+            const mobileVal = document.getElementById('s1_mobile').value.trim();
+            const panVal = document.getElementById('s1_pan').value.trim().toUpperCase();
+            const fyVal = document.getElementById('s2_fy').value;
+            const headVal = document.getElementById('s2_head').value;
+
+            // Mandatory field validation
+            if(!nameVal || !panVal || !emailVal || !mobileVal || !fyVal || !headVal) {
+                showToast("Please complete all mandatory fields (*).", true); 
                 return;
             }
-            if(!emailRegex.test(emailVal)) {
-                showToast("Please enter a valid full email address (e.g., name@gmail.com)", true);
-                return;
+
+            // Format validations
+            if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+                showToast("Invalid email address", true); return;
+            }
+            if(!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panVal)) {
+                showToast("Invalid PAN format (e.g., ABCDE1234F)", true); return;
+            }
+            if(!/^[6-9]\d{9}$/.test(mobileVal)) {
+                showToast("Invalid Mobile Number format", true); return;
             }
 
             const originalText = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Submitting...`;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Checking Details...`;
             btn.disabled = true; lucide.createIcons();
 
             try {
+                // Check for duplicates before uploading files
+                const checkRes = await fetch(`${SCRIPT_URL}?action=CHECK_DUPLICATE&pan=${panVal}&email=${emailVal}&mobile=${mobileVal}&fy=${fyVal}`);
+                const checkData = await checkRes.json();
+
+                if (checkData.duplicate) {
+                    alert(`Already applied for FY ${fyVal}!\nApplication No: ${checkData.appNo}\nStatus: ${checkData.status}`);
+                    btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons();
+                    return;
+                }
+
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Submitting...`;
+                
                 const bankFile = await processFileInput('s3_bank');
                 const form16File = await processFileInput('s3_form16');
                 const pnlFile = await processFileInput('s3_pnl');
@@ -1103,27 +1106,30 @@
                 const appNo = getNextItrAppNo();
                 currentItrAppNo = appNo;
                 
-                document.getElementById('payPan').value = document.getElementById('s1_pan').value.toUpperCase();
-                document.getElementById('payMobile').value = document.getElementById('s1_mobile').value;
-                document.getElementById('payName').value = document.getElementById('s1_name').value.trim();
+                document.getElementById('payPan').value = panVal;
+                document.getElementById('payMobile').value = mobileVal;
+                document.getElementById('payName').value = nameVal;
                 document.getElementById('payAkn').value = appNo;
                 updatePaymentUI();
 
                 const payload = {
-                    "action": "ITR", "#TimeStamp": new Date().toISOString(), "ApplicationNo": appNo,
-                    "Name": document.getElementById('s1_name').value.trim(), "Mobile": document.getElementById('s1_mobile').value,
-                    "Email": emailVal.toLowerCase(), "PAN": document.getElementById('s1_pan').value.toUpperCase(),
-                    "Password": "", "FY": document.getElementById('s2_fy').value,
-                    "HeadOfIncome": document.getElementById('s2_head').value, "BankStatementURL": bankFile,
+                    "action": "ITR", "ApplicationNo": appNo,
+                    "Name": nameVal, "Mobile": mobileVal,
+                    "Email": emailVal, "PAN": panVal,
+                    "Password": "", "FY": fyVal,
+                    "HeadOfIncome": headVal, "BankStatementURL": bankFile,
                     "Form16URL": form16File, "PnLURL": pnlFile, "OthersURL": othersFile,
                     "NameOfOtherStatement": document.getElementById('s3_other_name').value.trim()
                 };
 
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
-                    .then(() => { handleItrSuccess(appNo); btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); })
-                    .catch(() => { handleItrSuccess(appNo); btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); }); 
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
+                handleItrSuccess(appNo); 
+                btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons();
 
-            } catch (error) { showToast("Error submitting application.", true, false); btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); }
+            } catch (error) { 
+                showToast("Error submitting application.", true); 
+                btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); 
+            }
         }
 
         function handleItrSuccess(appNo) {
@@ -1133,8 +1139,11 @@
             document.getElementById('itrSuccessModal').classList.add('flex');
             document.getElementById('itrForm').reset();
             showToast(`App No: ${appNo} Submitted!`, false, true);
+            // Refresh dashboard status
+            fetchDashboardStatus();
         }
 
+        // PAYMENT FORM SUBMIT
         async function submitPaymentForm() {
             const btn = document.getElementById('paySubmitBtn'); 
             if (btn.disabled) return;
@@ -1145,8 +1154,7 @@
             const mobile = document.getElementById('payMobile').value;
             
             if(!amt || !name || !pan || !mobile) {
-                showToast("Please fill all mandatory fields (*).", true);
-                return;
+                showToast("Please fill all mandatory fields (*).", true); return;
             }
 
             const origText = btn.innerHTML;
@@ -1156,13 +1164,11 @@
             try {
                 const payProof = await processFileInput('payProof');
                 const ptrnSeq = getNextTrnNo();
-                
                 const userAkn = document.getElementById('payAkn').value;
                 const finalAkn = userAkn ? `${ptrnSeq}/${userAkn}` : ptrnSeq;
 
                 const payload = {
-                    "action": 'PAYMENT', "#TimeStamp": new Date().toISOString(), "Name": name, 
-                    "PAN": pan, "Mobile": mobile, "AKN": finalAkn, "Amount": amt, "PaymentProof": payProof
+                    "action": 'PAYMENT', "Name": name, "PAN": pan, "Mobile": mobile, "AKN": finalAkn, "Amount": amt, "PaymentProof": payProof
                 };
 
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
@@ -1177,14 +1183,14 @@
             } catch(e) { showToast("Error processing payment request.", true); btn.disabled = false; btn.innerHTML = origText; lucide.createIcons(); } 
         }
 
+        // UPLOAD MODAL
         async function submitUploadModal() {
             const btn = document.getElementById('uploadSubmitBtn');
             if(btn.disabled) return;
             const appNo = document.getElementById('uploadAppNo').value.trim();
             const fileInput = document.getElementById('uploadDocFile');
             if(!appNo || !fileInput.files.length) {
-                showToast("Please provide Application No and choose a file", true);
-                return;
+                showToast("Please provide Application No and choose a file", true); return;
             }
             const origText = btn.innerHTML;
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Uploading...`;
@@ -1200,6 +1206,9 @@
 
         function copyText(text) { navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard!", false, false)); }
     </script>
+    
+    <!-- PWA Registration -->
+    <div id="toast" class="toast"></div>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => { console.error('PWA fail:', err); }); });
