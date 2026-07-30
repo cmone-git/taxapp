@@ -47,7 +47,7 @@
         
         .corp-input, .corp-select {
             width: 100%; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px;
-            font-size: 15px; color: #0F172A; background: #FFFFFF; transition: all 0.2s ease; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            font-size: 16px; color: #0F172A; background: #FFFFFF; transition: all 0.2s ease; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
         .corp-input:focus, .corp-select:focus { 
             border-color: #111827; box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
@@ -55,7 +55,7 @@
         .corp-input[readonly] { background: #F1F5F9; color: #64748B; cursor: not-allowed; }
         
         .file-upload-wrapper {
-            position: relative; border: 1px dashed #CBD5E1; border-radius: 10px; padding: 20px; text-align: center; background: #FFFFFF; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            position: relative; border: 1px dashed #CBD5E1; border-radius: 10px; padding: 22px; text-align: center; background: #FFFFFF; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
         .file-upload-wrapper:hover { border-color: #111827; background: #F8FAFC; }
         .file-upload-wrapper input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
@@ -67,7 +67,7 @@
         @keyframes slideRight { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 15px; opacity: 0; visibility: hidden; transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 999999; display: flex; align-items: center; gap: 10px; white-space: nowrap; box-shadow: 0 6px 24px rgba(0,0,0,0.15); color: #FFFFFF; border: none; }
+        .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 15px; opacity: 0; visibility: hidden; transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 999999; display: flex; align-items: center; gap: 10px; white-space: nowrap; box-shadow: 0 6px 24px rgba(0,0,0,0.15); color: #FFFFFF; border: none; }
         .toast.success { background: #10B981; }
         .toast.error { background: #EF4444; }
         .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
@@ -83,7 +83,7 @@
         <img src="assets/name.png" alt="CM TaxApp" class="w-64 h-auto animate-pulse object-contain">
     </div>
 
-    <!-- Fixed Sticky Header (Height 64px for larger hit areas) -->
+    <!-- Fixed Sticky Header (Height 64px, Larger Icons & Text) -->
     <header class="fixed top-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 h-[64px] px-5 flex justify-between items-center">
         <div class="flex items-center">
             <!-- Header Logo (1x3) -->
@@ -151,7 +151,7 @@
                 </button>
             </div>
 
-            <!-- Quick Tools Grid (Larger Readability) -->
+            <!-- Quick Tools Grid (Enlarged Icons and Typography) -->
             <div>
                 <h3 class="text-xl font-bold text-gray-900 mb-5 px-1">Quick Tools</h3>
                 <div class="grid grid-cols-2 gap-4 gap-y-7 pt-1">
@@ -260,7 +260,7 @@
         </main>
     </div>
 
-    <!-- Fixed Full-Length Bottom Navigation Bar (Height 64px) -->
+    <!-- Fixed Full-Length Bottom Navigation Bar (Height 64px, Larger Typography) -->
     <nav class="fixed bottom-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md border-t border-gray-200 px-6 h-[64px] flex justify-between items-center pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <a href="#" onclick="goHome()" class="flex flex-col items-center gap-1.5 text-gray-900 w-16">
             <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
@@ -652,7 +652,7 @@
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Transaction Number</p>
                 <p id="successPtrnNo" class="font-mono font-bold text-white text-2xl tracking-wider"></p>
             </div>
-            <button onclick="closePaymentSuccessModal()" class="w-full bg-white text-gray-900 py-4 rounded-2xl font-bold shadow-md hover:bg-gray-100 transition text-lg">Done</button>
+            <button onclick="closePaymentSuccessModal()" class="w-full bg-white text-gray-900 py-4 rounded-2xl font-bold shadow-md hover:bg-gray-100 transition text-base">Done</button>
         </div>
     </div>
 
@@ -698,11 +698,12 @@
         // -------------------------
         function goHome() {
             document.querySelectorAll('.page-modal').forEach(m => { m.classList.add('hidden'); m.classList.remove('flex', 'block'); });
+            closeMenu();
             document.getElementById('mainApp').scrollTo(0,0);
         }
 
         // -------------------------
-        // LOCAL STORAGE SESSION
+        // LOCAL STORAGE SESSION & INITIALIZATION
         // -------------------------
         let currentUser = { name: "Guest User", email: "guest@example.com", picture: "" };
 
@@ -763,7 +764,7 @@
             showToast("Successfully Logged In", false, true);
         }
 
-        // Email Login (Simulated / Local save)
+        // Email Login 
         function processEmailLogin() {
             const btn = document.getElementById('btnEmailLogin');
             if (btn.disabled) return;
@@ -914,6 +915,8 @@
         // -------------------------
         function openLoginModal() { document.getElementById('loginScreen').classList.remove('hidden'); document.getElementById('loginScreen').classList.add('flex'); setTimeout(() => { document.getElementById('loginScreen').style.opacity = '1'; }, 10); }
         function closeLoginModal() { document.getElementById('loginScreen').style.opacity = '0'; setTimeout(() => { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('flex'); }, 300); }
+        function openMenu() { document.getElementById('sideMenu').classList.remove('hidden'); document.getElementById('sideMenu').classList.add('block'); }
+        function closeMenu() { document.getElementById('sideMenu').classList.add('hidden'); document.getElementById('sideMenu').classList.remove('block'); }
         function openPaymentSuccessModal() { document.getElementById('paymentSuccessModal').classList.remove('hidden'); document.getElementById('paymentSuccessModal').classList.add('flex'); }
         function closePaymentSuccessModal() { document.getElementById('paymentSuccessModal').classList.add('hidden'); document.getElementById('paymentSuccessModal').classList.remove('flex'); }
         function closeItrSuccessModal() { document.getElementById('itrSuccessModal').classList.add('hidden'); document.getElementById('itrSuccessModal').classList.remove('flex'); }
@@ -1018,12 +1021,29 @@
         function nextStep() { showStep(currentStep + 1); }
         function prevStep() { showStep(currentStep - 1); }
 
-        function processFile(inputId) {
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve({
+                    base64: reader.result.split(',')[1],
+                    mimeType: file.type,
+                    fileName: file.name
+                });
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function processFileInput(inputId) {
             const fileInput = document.getElementById(inputId);
             if (fileInput && fileInput.files.length > 0) {
-                return "Uploaded: " + fileInput.files[0].name;
+                try {
+                    return await readFileAsBase64(fileInput.files[0]);
+                } catch(e) {
+                    return "Error Reading File";
+                }
             }
-            return "Not Uploaded";
+            return null;
         }
 
         async function submitItrFinal() {
@@ -1039,9 +1059,10 @@
             btn.disabled = true; lucide.createIcons();
 
             try {
-                // Now safely passing only filenames to avoid Base64 payload crash
-                const bankFile = processFile('s3_bank'); const form16File = processFile('s3_form16');
-                const pnlFile = processFile('s3_pnl'); const othersFile = processFile('s3_others');
+                const bankFile = await processFileInput('s3_bank');
+                const form16File = await processFileInput('s3_form16');
+                const pnlFile = await processFileInput('s3_pnl');
+                const othersFile = await processFileInput('s3_others');
 
                 const now = new Date();
                 const appNo = `ITR4${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
@@ -1098,7 +1119,7 @@
             btn.disabled = true; lucide.createIcons();
 
             try {
-                const payProof = processFile('payProof');
+                const payProof = await processFileInput('payProof');
                 const now = new Date();
                 const ptrnNo = `PTRN${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
                 
