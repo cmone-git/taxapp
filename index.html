@@ -151,7 +151,7 @@
                 </button>
             </div>
 
-            <!-- Quick Tools Grid (Enlarged Icons and Typography) -->
+            <!-- Quick Tools Grid (Larger Readability) -->
             <div>
                 <h3 class="text-xl font-bold text-gray-900 mb-5 px-1">Quick Tools</h3>
                 <div class="grid grid-cols-2 gap-4 gap-y-7 pt-1">
@@ -377,8 +377,8 @@
                         </div>
                         <div class="grid grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-sm text-gray-600 mb-2 font-bold">Mobile</label>
-                                <input type="tel" id="s1_mobile" maxlength="10" class="corp-input">
+                                <label class="block text-sm text-gray-600 mb-2 font-bold">Mobile <span class="text-red-600">*</span></label>
+                                <input type="tel" id="s1_mobile" maxlength="10" class="corp-input" required>
                             </div>
                             <div>
                                 <label class="block text-sm text-gray-600 mb-2 font-bold">PAN <span class="text-red-600">*</span></label>
@@ -757,22 +757,30 @@
             currentUser.email = data.email;
             currentUser.picture = data.picture;
             
-            // Save Session
             localStorage.setItem('taxAppSession', JSON.stringify(currentUser));
             
             populateUserData(); closeLoginModal(); logUserSignIn(currentUser.name, currentUser.email);
             showToast("Successfully Logged In", false, true);
         }
 
-        // Email Login 
+        // Email Login with Strict Validation and Session Caching
         function processEmailLogin() {
             const btn = document.getElementById('btnEmailLogin');
             if (btn.disabled) return;
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPassword').value;
+            const email = (document.getElementById('loginEmail').value || "").trim();
+            const pass = (document.getElementById('loginPassword').value || "").trim();
             const rememberMe = document.getElementById('rememberMeCheckbox').checked;
 
-            if (!email || !pass) { showToast("Enter email and password", true); return; }
+            // Strict Email Domain Check
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email || !emailRegex.test(email)) { 
+                showToast("Please enter a valid full email address (e.g., name@gmail.com)", true); 
+                return; 
+            }
+            if (!pass) {
+                showToast("Please enter your password", true); 
+                return; 
+            }
             
             btn.disabled = true;
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Signing In...`;
@@ -780,7 +788,7 @@
             
             setTimeout(() => {
                 currentUser.name = email.split('@')[0];
-                currentUser.email = email;
+                currentUser.email = email.toLowerCase();
                 
                 if (rememberMe) {
                     localStorage.setItem('taxAppSession', JSON.stringify(currentUser));
@@ -1050,8 +1058,16 @@
             const btn = document.getElementById('btnSubmit'); 
             if (btn.disabled) return;
             
-            if(!document.getElementById('s1_name').value || !document.getElementById('s1_pan').value || !document.getElementById('s1_email').value || !document.getElementById('s2_fy').value || !document.getElementById('s2_head').value) {
-                showToast("Please complete all mandatory fields (*).", true, false); return;
+            const emailVal = (document.getElementById('s1_email').value || "").trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if(!document.getElementById('s1_name').value || !document.getElementById('s1_pan').value || !emailVal || !document.getElementById('s1_mobile').value || !document.getElementById('s2_fy').value || !document.getElementById('s2_head').value) {
+                showToast("Please complete all mandatory fields (*).", true, false); 
+                return;
+            }
+            if(!emailRegex.test(emailVal)) {
+                showToast("Please enter a valid full email address (e.g., name@gmail.com)", true);
+                return;
             }
 
             const originalText = btn.innerHTML;
@@ -1077,8 +1093,8 @@
                 const payload = {
                     "action": "ITR", "#TimeStamp": new Date().toISOString(), "ApplicationNo": appNo,
                     "Name": document.getElementById('s1_name').value.trim(), "Mobile": document.getElementById('s1_mobile').value,
-                    "Email": document.getElementById('s1_email').value.toLowerCase(), "PAN": document.getElementById('s1_pan').value.toUpperCase(),
-                    "Password": document.getElementById('s1_password').value, "FY": document.getElementById('s2_fy').value,
+                    "Email": emailVal.toLowerCase(), "PAN": document.getElementById('s1_pan').value.toUpperCase(),
+                    "Password": "", "FY": document.getElementById('s2_fy').value,
                     "HeadOfIncome": document.getElementById('s2_head').value, "BankStatementURL": bankFile,
                     "Form16URL": form16File, "PnLURL": pnlFile, "OthersURL": othersFile,
                     "NameOfOtherStatement": document.getElementById('s3_other_name').value.trim()
