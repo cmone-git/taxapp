@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CM TaxApp | Corporate Dashboard</title>
+    
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="apple-touch-icon" href="assets/logo.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <meta name="theme-color" content="#FFFFFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Identity Services for Login -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            primary: '#111827', 
+                            dark: '#0B1120',    
+                            text: '#334155',    
+                            heading: '#0F172A', 
+                            bg: '#F8FAFC'      
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: var(--tw-colors-brand-bg); -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .corp-input, .corp-select {
+            width: 100%; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px;
+            font-size: 16px; color: #0F172A; background: #FFFFFF; transition: all 0.2s ease; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .corp-input:focus, .corp-select:focus { 
+            border-color: #111827; box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+        }
+        .corp-input[readonly] { background: #F1F5F9; color: #64748B; cursor: not-allowed; }
+        
+        .file-upload-wrapper {
+            position: relative; border: 1px dashed #CBD5E1; border-radius: 10px; padding: 22px; text-align: center; background: #FFFFFF; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .file-upload-wrapper:hover { border-color: #111827; background: #F8FAFC; }
+        .file-upload-wrapper input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+        .step-active { color: #111827; font-weight: 700; border-bottom: 2px solid #111827; }
+        .step-inactive { color: #94A3B8; font-weight: 500; border-bottom: 2px solid transparent; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideRight { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 15px; opacity: 0; visibility: hidden; transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 999999; display: flex; align-items: center; gap: 10px; white-space: nowrap; box-shadow: 0 6px 24px rgba(0,0,0,0.15); color: #FFFFFF; border: none; }
+        .toast.success { background: #10B981; }
+        .toast.error { background: #EF4444; }
+        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body class="font-sans text-brand-text min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- Header -->
+    <header id="app-header" class="fixed top-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 h-[64px] px-5 flex justify-between items-center transition-all duration-300">
+        <div class="flex items-center">
+            <h1 class="font-black text-xl text-gray-900 tracking-tight cursor-pointer" onclick="navigateTo('page-dashboard')">CM TaxApp</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="navigateTo('page-taxupdates')" class="relative w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 shadow-sm hover:bg-gray-100 transition">
+                <i data-lucide="bell" class="w-5 h-5"></i>
+                <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-[#c80000] rounded-full animate-pulse border border-white"></span>
+            </button>
+            <button onclick="navigateTo('page-clients')" class="w-10 h-10 rounded-full border border-gray-200 shadow-sm bg-white overflow-hidden flex items-center justify-center hover:bg-gray-50 transition">
+                <i data-lucide="user" class="w-5 h-5 text-gray-500" id="headerAvatarIcon"></i>
+                <img id="headerAvatarImg" src="" class="w-full h-full object-cover hidden" alt="Profile">
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main id="app-main" class="flex-grow pt-[64px] pb-[70px] bg-[#F8FAFC]">
+
+        <!-- LOGIN MODULE -->
+        <div id="page-login" class="page-view min-h-screen flex flex-col bg-gray-900 justify-center px-5 -mt-[64px]">
+            <div class="bg-white rounded-[32px] w-full max-w-[420px] p-8 shadow-2xl relative flex flex-col items-center mx-auto">
+                <div class="w-20 h-20 bg-gray-900 rounded-2xl flex items-center justify-center mb-6 shadow-md mt-2">
+                    <i data-lucide="shield-check" class="w-10 h-10 text-white"></i>
+                </div>
+                <h1 class="text-3xl font-black text-gray-900 tracking-tight mb-2">Welcome Back</h1>
+                <p class="text-gray-500 text-base mb-8 text-center leading-relaxed">Sign in with your Google account.</p>
+                <div id="googleAuthContainer" class="w-full flex justify-center mb-6 min-h-[44px]"></div>
+                <p class="text-xs text-gray-400 text-center mt-4 px-4">Secure access authenticated via Google. By continuing, you agree to our Privacy Policy.</p>
+            </div>
+        </div>
+
+        <!-- DASHBOARD MODULE -->
+        <div id="page-dashboard" class="page-view px-5 w-full max-w-[600px] mx-auto space-y-7 pt-5 animate-[fadeIn_0.3s_ease-out]">
+            <!-- Welcome Section -->
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-3xl leading-none">👋</span>
+                    <h1 id="welcomeHeading" class="text-[32px] font-black text-gray-900 tracking-tight leading-none truncate">Welcome Back</h1>
+                </div>
+                <p class="text-sm text-gray-500 font-semibold pl-1.5">Manage your compliance professionally.</p>
+            </div>
+
+            <!-- Recent Status Widget -->
+            <div id="dashboardStatusContainer">
+                <div class="flex justify-between items-end mb-3 px-1">
+                    <h3 class="text-xl font-bold text-gray-900">Recent Status</h3>
+                    <button onclick="navigateTo('page-clients')" class="text-sm font-bold text-gray-500 hover:text-gray-900">My Filings</button>
+                </div>
+                <div id="dashboardStatusContent" class="grid grid-cols-2 gap-4">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Quick Tools Grid -->
+            <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3 px-1">Quick Tools</h3>
+                <div class="grid grid-cols-2 gap-4 gap-y-7 pt-1">
+                    <div class="relative cursor-pointer group" onclick="navigateTo('page-itr')">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-200 rounded-t-lg rounded-b-sm z-10"></div>
+                        <div class="bg-white rounded-2xl p-5 pt-6 shadow-sm border border-gray-100 h-full flex flex-col">
+                            <div class="flex justify-between items-start mb-3">
+                                <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider leading-tight">Income Tax</h4>
+                                <i data-lucide="file-text" class="w-6 h-6 text-slate-400"></i>
+                            </div>
+                            <p class="text-[13px] text-slate-500 mt-2">File ITR Return</p>
+                        </div>
+                    </div>
+                    <div class="relative cursor-pointer group" onclick="navigateTo('page-gst')">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-yellow-200 rounded-t-lg rounded-b-sm z-10"></div>
+                        <div class="bg-white rounded-2xl p-5 pt-6 shadow-sm border border-gray-100 h-full flex flex-col">
+                            <div class="flex justify-between items-start mb-3">
+                                <h4 class="text-sm font-bold text-yellow-700 uppercase tracking-wider leading-tight">GST Filing</h4>
+                                <i data-lucide="file-check-2" class="w-6 h-6 text-yellow-500"></i>
+                            </div>
+                            <p class="text-[13px] text-slate-500 mt-2">File Returns</p>
+                        </div>
+                    </div>
+                    <div class="relative cursor-pointer group" onclick="navigateTo('page-transactions')">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-indigo-200 rounded-t-lg rounded-b-sm z-10"></div>
+                        <div class="bg-white rounded-2xl p-5 pt-6 shadow-sm border border-gray-100 h-full flex flex-col">
+                            <div class="flex justify-between items-start mb-3">
+                                <h4 class="text-sm font-bold text-indigo-700 uppercase tracking-wider leading-tight">Payments</h4>
+                                <i data-lucide="credit-card" class="w-6 h-6 text-indigo-400"></i>
+                            </div>
+                            <p class="text-[13px] text-slate-500 mt-2">Pay securely</p>
+                        </div>
+                    </div>
+                    <div class="relative cursor-pointer group" onclick="navigateTo('page-taxupdates')">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-emerald-200 rounded-t-lg rounded-b-sm z-10"></div>
+                        <div class="bg-white rounded-2xl p-5 pt-6 shadow-sm border border-gray-100 h-full flex flex-col">
+                            <div class="flex justify-between items-start mb-3">
+                                <h4 class="text-sm font-bold text-emerald-700 uppercase tracking-wider leading-tight">Tax Updates</h4>
+                                <i data-lucide="newspaper" class="w-6 h-6 text-emerald-400"></i>
+                            </div>
+                            <p class="text-[13px] text-slate-500 mt-2">Latest news</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ITR Due Date Section -->
+            <div id="dashboardCalendarContainer" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-bold text-gray-900">Upcoming Due Dates</h3>
+                    <button onclick="navigateTo('page-taxcalendar')" class="text-xs font-bold text-blue-600">View All</button>
+                </div>
+                <div id="dashDueDatesList" class="space-y-3">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Dedicated Support -->
+            <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 flex items-center justify-between cursor-pointer shadow-lg mt-6" onclick="window.location.href='tel:+919946151111'">
+                <div class="flex items-center gap-5">
+                    <div class="w-14 h-14 rounded-2xl bg-gray-800 flex items-center justify-center text-white border border-gray-700">
+                        <i data-lucide="headset" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white">Dedicated Support</h4>
+                        <p class="text-sm text-gray-400 mt-1">Connect with your advisor</p>
+                    </div>
+                </div>
+                <i data-lucide="chevron-right" class="w-6 h-6 text-gray-500"></i>
+            </div>
+        </div>
+
+        <!-- ITR MODULE -->
+        <div id="page-itr" class="page-view hidden animate-[fadeIn_0.3s_ease-out] flex flex-col h-full bg-white relative">
+            <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="font-bold text-xl text-gray-900">File ITR</h3>
+                <button onclick="navigateTo('page-dashboard')" class="text-gray-500"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="px-5 pt-5 flex justify-between text-center border-b border-gray-200 pb-0">
+                <div id="navItrStep1" class="w-1/3 pb-4 step-active text-base">1. Personal</div>
+                <div id="navItrStep2" class="w-1/3 pb-4 step-inactive text-base">2. Income</div>
+                <div id="navItrStep3" class="w-1/3 pb-4 step-inactive text-base">3. Docs</div>
+            </div>
+            <div class="p-5 flex-grow bg-slate-50 overflow-y-auto">
+                <form id="itrForm" class="max-w-[600px] mx-auto space-y-5">
+                    <!-- Step 1 -->
+                    <div id="itrStep1" class="block animate-[fadeIn_0.3s_ease-out]">
+                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                            <h4 class="font-bold text-gray-900 border-b pb-3 mb-2">Personal Details</h4>
+                            <input type="text" id="itrName" class="corp-input" placeholder="Full Name *" required>
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="tel" id="itrMobile" class="corp-input" placeholder="Mobile *" maxlength="10" required>
+                                <input type="text" id="itrPan" class="corp-input uppercase font-mono" placeholder="PAN *" maxlength="10" required>
+                            </div>
+                            <input type="email" id="itrEmail" class="corp-input" placeholder="Email *" required>
+                        </div>
+                    </div>
+                    <!-- Step 2 -->
+                    <div id="itrStep2" class="hidden animate-[fadeIn_0.3s_ease-out]">
+                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                            <h4 class="font-bold text-gray-900 border-b pb-3 mb-2">Return Information</h4>
+                            <select id="itrAy" class="corp-select" required>
+                                <option value="" disabled selected>Assessment Year *</option>
+                                <option value="2024-25">2024-25</option>
+                                <option value="2025-26">2025-26</option>
+                                <option value="2026-27">2026-27</option>
+                            </select>
+                            <select id="itrType" class="corp-select" required>
+                                <option value="" disabled selected>Return Type *</option>
+                                <option value="ITR1">ITR 1</option>
+                                <option value="ITR2">ITR 2</option>
+                                <option value="ITR3">ITR 3</option>
+                                <option value="ITR4">ITR 4</option>
+                                <option value="ITR5">ITR 5</option>
+                                <option value="ITR6">ITR 6</option>
+                                <option value="ITR7">ITR 7</option>
+                                <option value="ITRU">ITR U</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Step 3 -->
+                    <div id="itrStep3" class="hidden animate-[fadeIn_0.3s_ease-out]">
+                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                            <h4 class="font-bold text-gray-900 border-b pb-3 mb-2">Upload Files</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="file-upload-wrapper"><span class="text-xs font-bold block" id="lblItrBank">Bank Stmt</span><input type="file" id="itrBank" onchange="updateFileLabel('itrBank','lblItrBank')"></div>
+                                <div class="file-upload-wrapper"><span class="text-xs font-bold block" id="lblItrForm16">Form 16</span><input type="file" id="itrForm16" onchange="updateFileLabel('itrForm16','lblItrForm16')"></div>
+                                <div class="file-upload-wrapper"><span class="text-xs font-bold block" id="lblItrPnl">P&L Stmt</span><input type="file" id="itrPnl" onchange="updateFileLabel('itrPnl','lblItrPnl')"></div>
+                                <div class="file-upload-wrapper"><span class="text-xs font-bold block" id="lblItrOthers">Others</span><input type="file" id="itrOthers" onchange="updateFileLabel('itrOthers','lblItrOthers')"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-5 bg-white border-t border-gray-200 flex gap-4 max-w-[600px] mx-auto w-full sticky bottom-[64px]">
+                <button type="button" id="btnItrBack" onclick="handleWizard('itr', -1)" class="w-1/3 bg-white border border-gray-200 font-bold py-4 rounded-xl hidden">Back</button>
+                <button type="button" id="btnItrNext" onclick="handleWizard('itr', 1)" class="flex-1 bg-gray-900 text-white font-bold py-4 rounded-xl">Next Step</button>
+                <button type="button" id="btnItrSubmit" onclick="submitCompliance('ITR')" class="flex-1 bg-gray-900 text-white font-bold py-4 rounded-xl hidden">Submit</button>
+            </div>
+        </div>
+
+        <!-- GST MODULE -->
+        <div id="page-gst" class="page-view hidden animate-[fadeIn_0.3s_ease-out] flex flex-col h-full bg-white relative">
+            <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="font-bold text-xl text-gray-900">File GST Return</h3>
+                <button onclick="navigateTo('page-dashboard')" class="text-gray-500"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="px-5 pt-5 flex justify-between text-center border-b border-gray-200 pb-0">
+                <div id="navGstStep1" class="w-1/3 pb-4 step-active text-base">1. Firm Info</div>
+                <div id="navGstStep2" class="w-1/3 pb-4 step-inactive text-base">2. Period</div>
+                <div id="navGstStep3" class="w-1/3 pb-4 step-inactive text-base">3. Docs</div>
+            </div>
+            <div class="p-5 flex-grow bg-slate-50 overflow-y-auto">
+                <form id="gstForm" class="max-w-[600px] mx-auto space-y-5">
+                    <!-- Step 1 -->
+                    <div id="gstStep1" class="block animate-[fadeIn_0.3s_ease-out]">
+                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                            <h4 class="font-bold text-gray-900 border-b pb-3 mb-2">Firm Details</h4>
+                            <input type="text" id="gstName" class="corp-input" placeholder="Firm / Proprietor Name *" required>
+                            <input type="text" id="gstGstin" class="corp-input uppercase font-mono" placeholder="GSTIN Number *" maxlength="15" required>
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="tel" id="gstMobile" class="corp-input" placeholder="Mobile *" maxlength="10" required>
+                                <input type="email" id="gstEmail" class="corp-input" placeholder="Email *" required>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Step 2 -->
+                    <div id="gstStep2" class="hidden animate-[fadeIn_0.3s_ease-out]">
+                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                            <h4 class="font-bold text-gray-900 border-b pb-3 mb-2">Return Period</h4>
+                            <select id="gstType" class="corp-select" required>
+                                <option value="" disabled selected>Return Type *</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Composition">Composition</option>
+                                <option value="Annual">Annual</option>
+                            </select>
+                            <select id="gstPeriod" class="corp-select" required>
+                                <option value="" disabled selected>Period (Month/Quarter/FY) *</option>
+                                <option value="April">April</option>
+                                <option value="May">May</option>
+                                <option value="June">June</option>
+                                <option value="Q1">Q1</option>
+                                <option value="Q2">Q2</option>
+                                <option value="FY24-25">FY 2024-25</option>
+                                <option value="FY25-26">FY 2025-26</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Step 3 -->
+                    <div id="gstStep3" class="hidden animate-[fadeIn_0.3s_ease-out]">
+                        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                            <h4 class="font-bold text-gray-900 border-b pb-3 mb-2">Upload Data</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="file-upload-wrapper"><span class="text-[11px] font-bold block" id="lblGstSales">Sales Stmt</span><input type="file" id="gstSales" onchange="updateFileLabel('gstSales','lblGstSales')"></div>
+                                <div class="file-upload-wrapper"><span class="text-[11px] font-bold block" id="lblGstPurchase">Purchase Stmt</span><input type="file" id="gstPurchase" onchange="updateFileLabel('gstPurchase','lblGstPurchase')"></div>
+                                <div class="file-upload-wrapper"><span class="text-[11px] font-bold block" id="lblGstBank">Bank Stmt</span><input type="file" id="gstBank" onchange="updateFileLabel('gstBank','lblGstBank')"></div>
+                                <div class="file-upload-wrapper"><span class="text-[11px] font-bold block" id="lblGstOthers">Others</span><input type="file" id="gstOthers" onchange="updateFileLabel('gstOthers','lblGstOthers')"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-5 bg-white border-t border-gray-200 flex gap-4 max-w-[600px] mx-auto w-full sticky bottom-[64px]">
+                <button type="button" id="btnGstBack" onclick="handleWizard('gst', -1)" class="w-1/3 bg-white border border-gray-200 font-bold py-4 rounded-xl hidden">Back</button>
+                <button type="button" id="btnGstNext" onclick="handleWizard('gst', 1)" class="flex-1 bg-gray-900 text-white font-bold py-4 rounded-xl">Next Step</button>
+                <button type="button" id="btnGstSubmit" onclick="submitCompliance('GST')" class="flex-1 bg-gray-900 text-white font-bold py-4 rounded-xl hidden">Submit GST</button>
+            </div>
+        </div>
+
+        <!-- PAYMENTS MODULE -->
+        <div id="page-transactions" class="page-view hidden animate-[fadeIn_0.3s_ease-out] px-5 max-w-[600px] mx-auto pt-5 space-y-6">
+            <h2 class="text-2xl font-bold">Secure Payment</h2>
+            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-5">
+                <h4 class="font-bold text-gray-900 border-b pb-3">Verify Invoice / Task</h4>
+                <div class="flex gap-2">
+                    <input type="text" id="payAkn" class="corp-input uppercase font-mono flex-grow text-sm" placeholder="Compliance No">
+                    <button onclick="verifyPayment()" class="bg-gray-900 text-white font-bold px-4 rounded-xl shadow-sm text-sm whitespace-nowrap" id="btnVerifyPay">Verify</button>
+                </div>
+                <div id="paymentStatusMessage" class="hidden text-sm font-bold text-center p-3 rounded-xl mt-2"></div>
+                
+                <div id="paymentDetailsArea" class="hidden space-y-4 pt-2">
+                    <input type="text" id="payClientName" class="corp-input bg-slate-50" readonly>
+                    <input type="number" id="payAmount" class="corp-input font-bold text-lg text-red-600 bg-slate-50" readonly>
+                    <button id="generateQrBtn" onclick="generatePaymentQR()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-md mt-4">Generate QR Code</button>
+                </div>
+            </div>
+
+            <div id="qrCodeArea" class="hidden bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center">
+                <p class="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">Scan & Pay Exact Amount</p>
+                <div class="p-4 bg-white border border-gray-200 rounded-2xl shadow-sm mb-4">
+                    <img id="upiQrCode" src="" alt="UPI QR Code" class="w-48 h-48 object-contain">
+                </div>
+                
+                <div class="w-full mt-4 border-t border-gray-200 pt-4">
+                    <h4 class="text-sm font-bold text-gray-900 mb-2">Upload Payment Proof</h4>
+                    <div class="file-upload-wrapper w-full py-4"><span class="text-xs font-bold" id="lblPayProof">Select File</span><input type="file" id="payProofFile" onchange="updateFileLabel('payProofFile','lblPayProof')"></div>
+                    <button onclick="submitPaymentProof()" class="w-full mt-3 bg-gray-900 text-white font-bold py-3.5 rounded-xl" id="btnSubmitPay">Submit Proof</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MY FILINGS MODULE -->
+        <div id="page-clients" class="page-view hidden animate-[fadeIn_0.3s_ease-out] px-5 max-w-[600px] mx-auto pt-5 space-y-6">
+            <h2 class="text-2xl font-bold">My Filings</h2>
+            <div id="myFilingsContainer" class="space-y-4 pt-2 pb-10">
+                <!-- Dynamically Populated -->
+            </div>
+        </div>
+
+        <!-- TAX UPDATES MODULE -->
+        <div id="page-taxupdates" class="page-view hidden animate-[fadeIn_0.3s_ease-out] px-5 max-w-[600px] mx-auto pt-5 space-y-6">
+            <h2 class="text-2xl font-bold">Tax Updates</h2>
+            <div id="taxUpdatesContainer" class="space-y-4 pt-2 pb-10">
+                <!-- Dynamically Populated -->
+            </div>
+        </div>
+
+        <!-- COMPLIANCE CALENDAR MODULE -->
+        <div id="page-taxcalendar" class="page-view hidden animate-[fadeIn_0.3s_ease-out] px-5 max-w-[600px] mx-auto pt-5 space-y-6">
+            <h2 class="text-2xl font-bold">Compliance Calendar</h2>
+            <div id="taxCalendarContainer" class="space-y-4 pt-2 pb-10">
+                <!-- Dynamically Populated -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav id="app-mobnav" class="fixed bottom-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md border-t border-gray-200 px-6 h-[70px] flex justify-between items-center pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)] transition-all duration-300">
+        <a href="#" onclick="navigateTo('page-dashboard')" class="flex flex-col items-center gap-1.5 text-gray-900 w-16">
+            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold mt-0.5">Home</span>
+        </a>
+        <a href="#" onclick="navigateTo('page-transactions')" class="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-900 transition w-16">
+            <i data-lucide="indian-rupee" class="w-6 h-6"></i>
+            <span class="text-[10px] font-semibold mt-0.5">Payments</span>
+        </a>
+        <a href="#" onclick="navigateTo('page-clients')" class="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-900 transition w-16">
+            <i data-lucide="user" class="w-6 h-6"></i>
+            <span class="text-[10px] font-semibold mt-0.5" id="navProfileText">Profile</span>
+        </a>
+        <a href="#" onclick="openSidebar()" class="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-900 transition w-16">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+            <span class="text-[10px] font-semibold mt-0.5">Menu</span>
+        </a>
+    </nav>
+
+    <!-- Sidebar Menu -->
+    <div id="app-sidebar" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onclick="closeSidebar()"></div>
+        <div class="absolute inset-y-0 left-0 w-[80%] max-w-sm bg-white shadow-2xl flex flex-col animate-[slideRight_0.2s_ease-out]">
+            <div class="px-6 py-8 border-b border-gray-100 bg-white flex justify-between items-start">
+                <div>
+                    <h2 id="sideNavName" class="text-lg font-bold text-gray-900 leading-tight">Guest User</h2>
+                    <p id="sideNavEmail" class="text-sm font-medium text-gray-500 mt-1">Please Sign In</p>
+                </div>
+                <button onclick="closeSidebar()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="flex-grow overflow-y-auto p-5 space-y-2">
+                <a href="#" onclick="navigateTo('page-dashboard')" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl text-gray-700 font-semibold"><i data-lucide="layout-dashboard" class="w-6 h-6"></i> Dashboard</a>
+                <a href="#" onclick="navigateTo('page-taxupdates')" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl text-gray-700 font-semibold"><i data-lucide="newspaper" class="w-6 h-6"></i> Tax Updates</a>
+                <a href="#" onclick="navigateTo('page-taxcalendar')" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl text-gray-700 font-semibold"><i data-lucide="calendar" class="w-6 h-6"></i> Calendar</a>
+                <a href="#" onclick="navigateTo('page-itr')" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl text-gray-700 font-semibold"><i data-lucide="file-text" class="w-6 h-6"></i> File ITR</a>
+                <a href="#" onclick="navigateTo('page-gst')" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl text-gray-700 font-semibold"><i data-lucide="file-check-2" class="w-6 h-6"></i> File GST</a>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex flex-col gap-3">
+                <button id="navSignOutBtn" onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 text-gray-900 font-bold border border-gray-200 bg-white py-4 rounded-xl hover:bg-gray-50 shadow-sm hidden"><i data-lucide="log-out" class="w-5 h-5"></i> Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successOverlay" class="fixed inset-0 z-[150] hidden flex-col bg-gray-900/80 backdrop-blur-sm justify-center items-center px-5 transition-opacity">
+        <div class="bg-[#1F2937] border border-gray-700 rounded-[32px] w-full max-w-[360px] p-8 shadow-2xl flex flex-col items-center animate-[zoomIn_0.3s_ease-out]">
+            <div class="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 mb-5 border-2 border-green-500/50">
+                <i data-lucide="check" class="w-10 h-10"></i>
+            </div>
+            <h3 id="successTitle" class="text-center font-bold text-2xl text-white mb-2">Success</h3>
+            <p id="successMessage" class="text-gray-400 text-sm text-center mb-4">Request submitted successfully.</p>
+            <div class="bg-gray-900/50 border border-gray-700 rounded-xl p-4 w-full mb-6 text-center shadow-inner mt-4">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Compliance No</p>
+                <p id="successRef" class="font-mono font-bold text-white text-lg tracking-wider"></p>
+            </div>
+            <button onclick="closeSuccess()" class="w-full bg-white text-gray-900 font-bold py-4 rounded-xl shadow-md">Done</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ============================================== -->
+    <!-- JAVASCRIPT LOGIC (API, UI, Utils)              -->
+    <!-- ============================================== -->
+    <script>
+        lucide.createIcons();
+        
+        // --- CONFIGURATION ---
+        // REPLACE WITH YOUR PUBLISHED WEB APP URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_REPLACE_ME/exec'; 
+        const GOOGLE_CLIENT_ID = "753272952222-c1pgj8cb8g7vte82sp6kevd3mku17cca.apps.googleusercontent.com"; 
+        
+        let currentUser = null; 
+        let currentStep = { itr: 1, gst: 1 };
+
+        // --- UTILITIES ---
+        const showToast = (msg, err = false) => {
+            const toast = document.getElementById('toast');
+            toast.className = `toast show ${err ? 'error' : 'success'}`;
+            toast.innerHTML = `<i data-lucide="${err ? 'alert-circle' : 'check-circle'}" class="w-5 h-5"></i><span>${msg}</span>`;
+            lucide.createIcons(); setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+
+        const fileToBase64 = (fileInputId) => new Promise((resolve, reject) => {
+            const file = document.getElementById(fileInputId).files[0];
+            if(!file) return resolve(null);
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve({ name: file.name, mimeType: file.type, data: reader.result.split(',')[1] });
+            reader.onerror = error => reject(error);
+        });
+
+        const updateFileLabel = (inputId, labelId) => {
+            const file = document.getElementById(inputId).files[0];
+            if(file) {
+                let name = file.name;
+                if(name.length > 10) name = name.substring(0, 8) + '...';
+                document.getElementById(labelId).innerText = name;
+                document.getElementById(labelId).classList.add('text-green-600');
+            }
+        };
+
+        // Standardized API Caller
+        const apiCall = async (payload) => {
+            try {
+                // We use method POST for sending large files to Google Apps Script. 
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                return await response.json();
+            } catch (error) {
+                console.error("API Error", error);
+                throw new Error("Network or server error.");
+            }
+        };
+
+        // --- NAVIGATION ---
+        const navigateTo = (pageId) => {
+            document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(pageId);
+            if(target) target.classList.remove('hidden');
+            
+            const isLogin = (pageId === 'page-login');
+            document.getElementById('app-header').style.display = isLogin ? 'none' : 'flex';
+            document.getElementById('app-mobnav').style.display = isLogin ? 'none' : 'flex';
+            
+            window.scrollTo(0,0);
+            closeSidebar();
+
+            if(!isLogin && currentUser) {
+                if(pageId === 'page-dashboard') loadDashboard();
+                if(pageId === 'page-clients') loadMyFilings();
+                if(pageId === 'page-taxupdates') loadTaxUpdates();
+                if(pageId === 'page-taxcalendar') loadCalendar();
+            }
+        };
+        const openSidebar = () => document.getElementById('app-sidebar').classList.remove('hidden');
+        const closeSidebar = () => document.getElementById('app-sidebar').classList.add('hidden');
+
+        // --- AUTHENTICATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedSession = localStorage.getItem('taxAppUser');
+            if (savedSession) { 
+                currentUser = JSON.parse(savedSession); 
+                populateUserData(); 
+                navigateTo('page-dashboard');
+            } else {
+                navigateTo('page-login');
+            }
+        });
+
+        window.onload = function () {
+            if(typeof google !== 'undefined') {
+                google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse, cancel_on_tap_outside: false });
+                google.accounts.id.renderButton(document.getElementById("googleAuthContainer"), { theme: "outline", size: "large", width: 280 });
+            }
+        };
+
+        async function handleCredentialResponse(response) {
+            const base64Url = response.credential.split('.')[1];
+            const base64 = decodeURIComponent(window.atob(base64Url.replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const gData = JSON.parse(base64);
+            
+            showToast("Verifying with server...");
+            try {
+                const res = await apiCall({ action: 'LOGIN', email: gData.email });
+                if(res.success) {
+                    currentUser = { 
+                        clientId: res.clientId, 
+                        name: res.name || gData.name, 
+                        email: gData.email.toLowerCase(), 
+                        picture: gData.picture 
+                    };
+                    localStorage.setItem('taxAppUser', JSON.stringify(currentUser));
+                    populateUserData();
+                    navigateTo('page-dashboard');
+                    showToast("Login successful!");
+                } else {
+                    showToast(res.message || "Email not registered.", true);
+                }
+            } catch(e) {
+                showToast("Connection failed.", true);
+            }
+        }
+
+        function populateUserData() {
+            document.getElementById('welcomeHeading').innerText = "Hi, " + currentUser.name.split(' ')[0];
+            document.getElementById('sideNavName').innerText = currentUser.name;
+            document.getElementById('sideNavEmail').innerText = currentUser.email;
+            document.getElementById('navSignOutBtn').classList.remove('hidden');
+            if(currentUser.picture) {
+                document.getElementById('headerAvatarIcon').parentElement.classList.add('hidden');
+                document.getElementById('headerAvatarImg').src = currentUser.picture;
+                document.getElementById('headerAvatarImg').classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('taxAppUser'); 
+            currentUser = null; 
+            navigateTo('page-login'); 
+            showToast("Logged out");
+        }
+
+        // --- DASHBOARD DATA ---
+        async function loadDashboard() {
+            try {
+                const res = await apiCall({ action: 'GET_DASHBOARD', clientId: currentUser.clientId });
+                
+                // Status Widget
+                const statusDiv = document.getElementById('dashboardStatusContent');
+                if(res.recentFilings && res.recentFilings.length > 0) {
+                    statusDiv.innerHTML = res.recentFilings.map(item => `
+                        <div class="bg-white rounded-[20px] p-4 shadow-sm border border-gray-100 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-600"><i data-lucide="${item.ComplianceName === 'ITR' ? 'file-text' : 'file-check-2'}" class="w-4 h-4"></i></div>
+                                    <h4 class="font-bold text-sm truncate">${item.ComplianceName}</h4>
+                                </div>
+                                <p class="text-[10px] font-mono bg-gray-50 px-1.5 py-0.5 rounded inline-block text-gray-500 mb-2">${item.ComplianceNo}</p>
+                                <div class="text-[11px] font-bold text-gray-500 flex justify-between">Status: <span class="text-gray-900">${item.StatusOfCompliance}</span></div>
+                            </div>
+                        </div>`).join('');
+                } else {
+                    statusDiv.innerHTML = `<div class="col-span-2 text-sm text-gray-500">No recent filings.</div>`;
+                }
+
+                // Calendar Mini
+                const calDiv = document.getElementById('dashDueDatesList');
+                if(res.upcomingDates && res.upcomingDates.length > 0) {
+                    calDiv.innerHTML = res.upcomingDates.slice(0, 3).map(item => `
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                            <div><p class="font-bold text-sm text-gray-900">${item.Title}</p><p class="text-xs text-gray-500">${item.Description}</p></div>
+                            <div class="text-right"><span class="bg-red-50 text-red-600 text-xs font-bold px-2 py-1 rounded-md">${item.Date}</span></div>
+                        </div>`).join('');
+                } else {
+                    calDiv.innerHTML = `<p class="text-sm text-gray-500">No upcoming dates.</p>`;
+                }
+                lucide.createIcons();
+            } catch(e) { console.log(e); }
+        }
+
+        // --- WIZARDS (ITR & GST) ---
+        function handleWizard(type, dir) {
+            let step = currentStep[type];
+            document.getElementById(`${type}Step${step}`).classList.add('hidden');
+            document.getElementById(`nav${type.charAt(0).toUpperCase() + type.slice(1)}Step${step}`).className = "w-1/3 pb-4 step-inactive text-base";
+            
+            step += dir;
+            currentStep[type] = step;
+            
+            document.getElementById(`${type}Step${step}`).classList.remove('hidden');
+            document.getElementById(`nav${type.charAt(0).toUpperCase() + type.slice(1)}Step${step}`).className = "w-1/3 pb-4 step-active text-base";
+            
+            document.getElementById(`btn${type.charAt(0).toUpperCase() + type.slice(1)}Back`).style.display = step > 1 ? 'block' : 'none';
+            document.getElementById(`btn${type.charAt(0).toUpperCase() + type.slice(1)}Next`).style.display = step < 3 ? 'block' : 'none';
+            document.getElementById(`btn${type.charAt(0).toUpperCase() + type.slice(1)}Submit`).style.display = step === 3 ? 'block' : 'none';
+        }
+
+        async function submitCompliance(type) {
+            const btn = document.getElementById(`btn${type.charAt(0).toUpperCase() + type.slice(1)}Submit`);
+            btn.disabled = true; btn.innerHTML = 'Processing...';
+            showToast("Reading files...");
+            
+            try {
+                let payload = { action: 'SAVE_COMPLIANCE', type: type, clientId: currentUser.clientId };
+                
+                if (type === 'ITR') {
+                    payload.name = document.getElementById('itrName').value;
+                    payload.mobile = document.getElementById('itrMobile').value;
+                    payload.email = document.getElementById('itrEmail').value;
+                    payload.pan = document.getElementById('itrPan').value;
+                    payload.period = document.getElementById('itrAy').value;
+                    payload.returnType = document.getElementById('itrType').value;
+                    payload.files = {
+                        bank: await fileToBase64('itrBank'),
+                        form16: await fileToBase64('itrForm16'),
+                        pnl: await fileToBase64('itrPnl'),
+                        others: await fileToBase64('itrOthers')
+                    };
+                } else {
+                    payload.name = document.getElementById('gstName').value;
+                    payload.gstin = document.getElementById('gstGstin').value;
+                    payload.mobile = document.getElementById('gstMobile').value;
+                    payload.email = document.getElementById('gstEmail').value;
+                    payload.returnType = document.getElementById('gstType').value;
+                    payload.period = document.getElementById('gstPeriod').value;
+                    payload.files = {
+                        sales: await fileToBase64('gstSales'),
+                        purchase: await fileToBase64('gstPurchase'),
+                        bank: await fileToBase64('gstBank'),
+                        others: await fileToBase64('gstOthers')
+                    };
+                }
+                
+                showToast("Uploading & Saving...");
+                const res = await apiCall(payload);
+                
+                if(res.success) {
+                    document.getElementById('successRef').innerText = res.complianceNo;
+                    document.getElementById('successOverlay').classList.remove('hidden');
+                    document.getElementById('successOverlay').classList.add('flex');
+                    document.getElementById(`${type.toLowerCase()}Form`).reset();
+                    handleWizard(type.toLowerCase(), -2); // Reset to step 1
+                } else {
+                    showToast(res.message || "Error submitting", true);
+                }
+            } catch(e) {
+                showToast(e.message, true);
+            }
+            btn.disabled = false; btn.innerHTML = `Submit ${type}`;
+        }
+
+        function closeSuccess() {
+            document.getElementById('successOverlay').classList.add('hidden');
+            document.getElementById('successOverlay').classList.remove('flex');
+            navigateTo('page-dashboard');
+        }
+
+        // --- PAYMENTS ---
+        async function verifyPayment() {
+            const appNo = document.getElementById('payAkn').value.trim().toUpperCase();
+            if(!appNo) return showToast("Enter Compliance No", true);
+            
+            const btn = document.getElementById('btnVerifyPay'); btn.innerText = "...";
+            const msg = document.getElementById('paymentStatusMessage'); 
+            msg.classList.remove('hidden'); msg.innerText = "Verifying...";
+            document.getElementById('paymentDetailsArea').classList.add('hidden');
+            document.getElementById('qrCodeArea').classList.add('hidden');
+            
+            try {
+                const res = await apiCall({ action: 'VERIFY_PAYMENT', complianceNo: appNo });
+                if(res.success) {
+                    msg.classList.add('hidden');
+                    document.getElementById('paymentDetailsArea').classList.remove('hidden');
+                    document.getElementById('payClientName').value = res.clientName;
+                    document.getElementById('payAmount').value = "₹" + res.balance;
+                } else {
+                    msg.innerText = res.message;
+                }
+            } catch(e) { msg.innerText = "Error verifying."; }
+            btn.innerText = "Verify";
+        }
+
+        function generatePaymentQR() {
+            const amtStr = document.getElementById('payAmount').value.replace('₹', '');
+            if(parseFloat(amtStr) > 0) {
+                document.getElementById('upiQrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=accountree@ybl&pn=CMTaxApp&am=${amtStr}`;
+                document.getElementById('qrCodeArea').classList.remove('hidden');
+                document.getElementById('generateQrBtn').classList.add('hidden');
+            }
+        }
+
+        async function submitPaymentProof() {
+            const file = await fileToBase64('payProofFile');
+            if(!file) return showToast("Please select a file first", true);
+            
+            const btn = document.getElementById('btnSubmitPay'); btn.innerText = "Uploading...";
+            try {
+                const res = await apiCall({
+                    action: 'UPDATE_PAYMENT',
+                    complianceNo: document.getElementById('payAkn').value.trim().toUpperCase(),
+                    file: file
+                });
+                if(res.success) {
+                    showToast("Payment proof uploaded successfully");
+                    setTimeout(()=>navigateTo('page-dashboard'), 2000);
+                } else {
+                    showToast(res.message || "Failed to upload", true);
+                }
+            } catch(e) { showToast("Upload failed", true); }
+            btn.innerText = "Submit Proof";
+        }
+
+        // --- LISTINGS (My Filings, Updates, Calendar) ---
+        async function loadMyFilings() {
+            const c = document.getElementById('myFilingsContainer');
+            c.innerHTML = `<div class="text-center py-10"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-gray-400"></i></div>`;
+            try {
+                const res = await apiCall({ action: 'GET_FILINGS', clientId: currentUser.clientId });
+                if(res.data && res.data.length > 0) {
+                    c.innerHTML = res.data.map(item => `
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-3">
+                            <div class="flex justify-between items-start mb-2">
+                                <div><h4 class="font-bold text-gray-900">${item.ComplianceName} - ${item.Period}</h4><p class="text-xs font-mono text-gray-500">${item.ComplianceNo}</p></div>
+                                <span class="bg-gray-100 text-gray-800 text-[10px] font-bold px-2 py-1 rounded">${item.StatusOfCompliance}</span>
+                            </div>
+                            <div class="flex gap-2 mt-3 pt-3 border-t border-gray-50">
+                                ${item.FolderUrl ? `<a href="${item.FolderUrl}" target="_blank" class="text-xs font-bold text-blue-600 hover:underline"><i data-lucide="folder" class="w-3 h-3 inline"></i> Folder</a>` : ''}
+                                ${item.AknUrl ? `<a href="${item.AknUrl}" target="_blank" class="text-xs font-bold text-green-600 hover:underline ml-2"><i data-lucide="file-check" class="w-3 h-3 inline"></i> Ack</a>` : ''}
+                                ${item.InvoiceNo ? `<span class="text-xs font-bold text-gray-400 ml-auto flex items-center"><i data-lucide="receipt" class="w-3 h-3 inline mr-1"></i> ${item.InvoiceNo}</span>` : ''}
+                            </div>
+                        </div>`).join('');
+                    lucide.createIcons();
+                } else { c.innerHTML = `<p class="text-center text-gray-500 text-sm mt-5">No filings found.</p>`; }
+            } catch(e) { c.innerHTML = "Failed to load."; }
+        }
+
+        async function loadTaxUpdates() {
+            const c = document.getElementById('taxUpdatesContainer');
+            c.innerHTML = `<div class="text-center py-10"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-gray-400"></i></div>`;
+            try {
+                const res = await apiCall({ action: 'GET_UPDATES' });
+                c.innerHTML = res.data.map(d => `<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-3">
+                    <h4 class="font-bold text-gray-900">${d.Title}</h4><p class="text-sm text-gray-600 mt-1">${d.Description}</p><p class="text-xs text-gray-400 mt-2">${d.Date}</p></div>`).join('');
+            } catch(e) { c.innerHTML = "Failed to load."; }
+        }
+
+        async function loadCalendar() {
+            const c = document.getElementById('taxCalendarContainer');
+            c.innerHTML = `<div class="text-center py-10"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-gray-400"></i></div>`;
+            try {
+                const res = await apiCall({ action: 'GET_CALENDAR' });
+                c.innerHTML = res.data.map(item => `
+                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center mb-3">
+                        <div><h4 class="font-bold">${item.Title}</h4><p class="text-xs text-gray-500">${item.Description}</p></div>
+                        <div class="text-right bg-red-50 px-3 py-1.5 rounded-lg border border-red-100"><span class="font-bold text-red-600 text-sm block">${item.Date}</span></div>
+                    </div>`).join('');
+            } catch(e) { c.innerHTML = "Failed to load."; }
+        }
+    </script>
+</body>
+</html>
