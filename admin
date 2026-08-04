@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flow - Compliance Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: {
+                            light: '#f2f2f6', 
+                            dark: '#000000'
+                        },
+                        card: {
+                            light: '#ffffff',
+                            dark: '#1c1c1e'
+                        },
+                        primary: '#C10000', // Flow Red
+                        textMain: {
+                            light: '#1c1c1e',
+                            dark: '#f2f2f6'
+                        },
+                        textSub: {
+                            light: '#8e8e93',
+                            dark: '#98989d'
+                        }
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-tap-highlight-color: transparent; 
+        }
+        
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .nav-item.active {
+            color: #C10000; 
+        }
+        
+        .nav-item.active i {
+            fill: currentColor;
+            fill-opacity: 0.15;
+        }
+
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-textMain-light dark:text-textMain-dark font-sans h-screen flex flex-col overflow-hidden">
+
+    <!-- Login View (Visible by default) -->
+    <div id="login-view" class="h-screen w-full flex items-center justify-center p-6 z-50">
+        <div class="bg-card-light dark:bg-card-dark p-8 rounded-4xl shadow-sm border border-gray-100 dark:border-gray-800 w-full max-w-sm text-center">
+            <div class="w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center font-bold text-3xl shadow-sm shadow-primary/40 mx-auto mb-4">F</div>
+            <h1 class="text-2xl font-bold mb-2">Flow</h1>
+            <p class="text-textSub-light dark:text-textSub-dark text-sm mb-8">Sign in to manage compliance</p>
+            
+            <!-- Google Auth Button Container -->
+            <div id="google-btn-container" class="flex justify-center mb-6 min-h-[40px]"></div>
+
+            <div class="relative flex py-2 items-center mb-6">
+                <div class="flex-grow border-t border-gray-200 dark:border-gray-800"></div>
+                <span class="flex-shrink-0 mx-4 text-textSub-light dark:text-textSub-dark text-xs font-medium uppercase tracking-wider">Or Admin Login</span>
+                <div class="flex-grow border-t border-gray-200 dark:border-gray-800"></div>
+            </div>
+
+            <!-- Manual Admin Login Fallback -->
+            <input type="email" id="admin-email" placeholder="Enter admin/client email" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:border-primary text-sm transition-colors text-textMain-light dark:text-textMain-dark">
+            <button id="btn-manual-login" class="w-full bg-primary text-white font-semibold rounded-xl px-4 py-3 active:scale-95 transition-transform flex items-center justify-center gap-2 shadow-sm shadow-primary/30">
+                <span>Continue</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+            <p id="login-error" class="text-primary text-xs mt-4 hidden font-medium"></p>
+        </div>
+    </div>
+
+    <!-- Main App View (Hidden until authenticated) -->
+    <div id="app-view" class="hidden flex-col h-screen overflow-hidden w-full">
+        <!-- Header -->
+        <header class="pt-safe px-6 py-4 flex justify-between items-center bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md z-10 sticky top-0 border-b border-gray-200/50 dark:border-gray-800/50">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-sm shadow-primary/40">F</div>
+                <h1 class="text-2xl font-semibold tracking-tight">Flow</h1>
+            </div>
+            <div class="flex items-center gap-4 text-textMain-light dark:text-textMain-dark">
+                <button class="p-2 -mr-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <i data-lucide="search" class="w-6 h-6"></i>
+                </button>
+                <button id="btn-theme" class="p-2 -mr-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <i data-lucide="sun" class="w-6 h-6 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-6 h-6 block dark:hidden"></i>
+                </button>
+                <button class="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden flex items-center justify-center border-2 border-transparent focus:border-primary transition-colors">
+                    <span id="user-initial" class="font-bold text-sm text-gray-600 dark:text-gray-300">U</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-1 overflow-y-auto p-6 pb-32">
+            <!-- Content gets injected here -->
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 w-full bg-card-light/90 dark:bg-card-dark/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 pb-safe z-20">
+            <div class="flex justify-around items-center h-20 px-2">
+                <button class="nav-item active flex flex-col items-center justify-center w-full h-full gap-1 text-textSub-light dark:text-textSub-dark transition-colors" data-view="dashboard">
+                    <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium tracking-wide">Home</span>
+                </button>
+                <button class="nav-item flex flex-col items-center justify-center w-full h-full gap-1 text-textSub-light dark:text-textSub-dark transition-colors" data-view="clients">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium tracking-wide">Clients</span>
+                </button>
+                <button class="nav-item flex flex-col items-center justify-center w-full h-full gap-1 text-textSub-light dark:text-textSub-dark transition-colors" data-view="tasks">
+                    <i data-lucide="check-square" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium tracking-wide">Tasks</span>
+                </button>
+                <button class="nav-item flex flex-col items-center justify-center w-full h-full gap-1 text-textSub-light dark:text-textSub-dark transition-colors" data-view="transactions">
+                    <i data-lucide="arrow-right-left" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium tracking-wide">Transact</span>
+                </button>
+                <button class="nav-item flex flex-col items-center justify-center w-full h-full gap-1 text-textSub-light dark:text-textSub-dark transition-colors" data-view="menu">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium tracking-wide">More</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- App Logic -->
+    <script>
+        const GOOGLE_CLIENT_ID = "753272952222-c1pgj8cb8g7vte82sp6kevd3mku17cca.apps.googleusercontent.com";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5VHAOIBC2rDv305WJJm-iuKfi9bjxvV-rRhR9E9mJcPeBgMBX6aYw-nbrWcGeQ6C0A/exec";
+
+        let currentUser = null;
+        let selectedDate = 4; // Default calendar selected date
+
+        // Mock Data for UI presentation
+        const db = {
+            clients: [
+                { id: 1, name: "Acme Corp", industry: "Finance", status: "Compliant" },
+                { id: 2, name: "Stark Industries", industry: "Manufacturing", status: "Review Needed" },
+                { id: 3, name: "Wayne Enterprises", industry: "Tech", status: "Non-Compliant" },
+                { id: 4, name: "Globex", industry: "Logistics", status: "Compliant" },
+            ],
+            tasks: [
+                { id: 101, title: "Q3 Audit Report", client: "Acme Corp", due: "Today", date: 4, priority: "High", completed: false },
+                { id: 102, title: "KYC Verification", client: "Stark Industries", due: "Today", date: 4, priority: "Medium", completed: false },
+                { id: 103, title: "Policy Update Review", client: "Internal", due: "Aug 5", date: 5, priority: "Low", completed: false },
+                { id: 104, title: "Risk Assessment", client: "Wayne Ent.", due: "Aug 6", date: 6, priority: "High", completed: false },
+            ],
+            transactions: [
+                { id: 1001, entity: "Legal Fees", amount: "-₹1,250.00", date: "Aug 02", type: "out", status: "Completed" },
+                { id: 1002, entity: "Compliance Retainer", amount: "+₹4,500.00", date: "Aug 01", type: "in", status: "Completed" },
+                { id: 1003, entity: "Filing Penalty", amount: "-₹300.00", date: "Jul 28", type: "out", status: "Pending" },
+                { id: 1004, entity: "Consultation", amount: "+₹850.00", date: "Jul 25", type: "in", status: "Completed" },
+            ]
+        };
+
+        // View Renderers
+        const views = {
+            dashboard: () => {
+                const dayTasks = db.tasks.filter(t => t.date === selectedDate);
+                
+                return `
+                <div class="mb-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold tracking-tight mb-2">Dashboard</h2>
+                        <p class="text-textSub-light dark:text-textSub-dark text-sm">Overview & Schedule</p>
+                    </div>
+                    <button class="bg-gray-200/50 dark:bg-gray-800/50 text-textMain-light dark:text-textMain-dark p-3 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors shadow-sm">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Financial Summary & Task Donut (White backgrounds) -->
+                <div class="flex gap-3 mb-6 overflow-x-auto pb-2 -mx-2 px-2" style="-ms-overflow-style: none; scrollbar-width: none;">
+                    
+                    <div class="flex-shrink-0 w-44 bg-card-light dark:bg-card-dark text-textMain-light dark:text-textMain-dark p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-center">
+                        <div class="flex items-center gap-1 text-textSub-light dark:text-textSub-dark text-[11px] font-medium mb-1 uppercase tracking-wider">
+                            <i data-lucide="wallet" class="w-3 h-3"></i> Total Balance
+                        </div>
+                        <div class="text-xl font-bold">₹34,567.90</div>
+                    </div>
+                    
+                    <div class="flex-shrink-0 w-32 bg-card-light dark:bg-card-dark p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-primary/5 dark:bg-primary/10"></div>
+                        <div class="relative z-10 flex items-center gap-1 text-primary/80 text-[11px] font-medium mb-1 uppercase tracking-wider">
+                            <i data-lucide="alert-circle" class="w-3 h-3"></i> Pending Due
+                        </div>
+                        <div class="relative z-10 text-lg font-bold text-primary">₹12,450.00</div>
+                    </div>
+                    
+                    <div class="flex-shrink-0 w-32 bg-card-light dark:bg-card-dark p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center">
+                        <div class="relative w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-1">
+                            <div class="absolute inset-0 rounded-full transition-all duration-1000" style="background: conic-gradient(#C10000 66%, transparent 0);"></div>
+                            <div class="absolute inset-[5px] bg-card-light dark:bg-card-dark rounded-full flex items-center justify-center z-10 shadow-sm">
+                                <span class="text-xs font-bold text-textMain-light dark:text-textMain-dark">8/12</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-medium text-textSub-light dark:text-textSub-dark mt-1 uppercase tracking-wider">Tasks</span>
+                    </div>
+
+                </div>
+
+                <!-- Interactive Calendar Ribbon (Reduced Size) -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3 px-1">
+                        <h3 class="font-bold text-lg">August 2026</h3>
+                        <i data-lucide="calendar" class="w-5 h-5 text-textSub-light dark:text-textSub-dark"></i>
+                    </div>
+                    <div class="flex gap-2.5 overflow-x-auto pb-2 -mx-2 px-2" style="-ms-overflow-style: none; scrollbar-width: none;">
+                        ${[2, 3, 4, 5, 6, 7, 8].map(day => `
+                            <button class="cal-date flex-shrink-0 w-12 h-14 rounded-[14px] flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${selectedDate === day ? 'bg-primary text-white shadow-md shadow-primary/40' : 'bg-card-light dark:bg-card-dark text-textSub-light dark:text-textSub-dark border border-gray-100 dark:border-gray-800'}" data-date="${day}">
+                                <span class="text-[10px] font-medium uppercase tracking-wider ${selectedDate === day ? 'text-white/80' : ''}">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day%7]}</span>
+                                <span class="text-base font-bold ${selectedDate === day ? 'text-white' : 'text-textMain-light dark:text-textMain-dark'}">${day}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Dynamic Tasks Module for Selected Date -->
+                <div class="flex justify-between items-center mb-3 px-1">
+                    <h3 class="font-bold text-lg">Tasks for Aug ${selectedDate}</h3>
+                    <span class="text-xs font-semibold bg-gray-200/50 dark:bg-gray-800/50 px-3 py-1 rounded-full text-textMain-light dark:text-textMain-dark">${dayTasks.length} pending</span>
+                </div>
+                
+                ${dayTasks.length > 0 ? `
+                    <div class="space-y-3 mb-6">
+                        ${dayTasks.map(task => `
+                            <div class="bg-card-light dark:bg-card-dark p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4">
+                                <button class="mt-1 w-6 h-6 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center flex-shrink-0"></button>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-base mb-0.5">${task.title}</h3>
+                                    <div class="flex justify-between items-center">
+                                        <p class="text-textSub-light dark:text-textSub-dark text-xs font-medium">${task.client}</p>
+                                        <div class="w-2 h-2 rounded-full ${task.priority === 'High' ? 'bg-primary' : task.priority === 'Medium' ? 'bg-amber-500' : 'bg-green-500'}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <div class="bg-card-light dark:bg-card-dark p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 text-center mb-6">
+                        <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="check" class="w-6 h-6 text-green-500"></i>
+                        </div>
+                        <h4 class="font-semibold text-lg mb-1">All clear!</h4>
+                        <p class="text-textSub-light dark:text-textSub-dark text-sm">No tasks scheduled for this day.</p>
+                    </div>
+                `}
+
+                <!-- Recent Quick Actions -->
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h3 class="text-lg font-bold">Quick Actions</h3>
+                </div>
+                <div class="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2" style="-ms-overflow-style: none; scrollbar-width: none;">
+                    <button class="flex-shrink-0 bg-card-light dark:bg-card-dark border border-gray-100 dark:border-gray-800 px-4 py-3 rounded-2xl flex items-center gap-3 active:scale-95 transition-transform shadow-sm">
+                        <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 flex items-center justify-center"><i data-lucide="file-plus" class="w-5 h-5"></i></div>
+                        <span class="font-semibold text-sm pr-2">New Client</span>
+                    </button>
+                    <button class="flex-shrink-0 bg-card-light dark:bg-card-dark border border-gray-100 dark:border-gray-800 px-4 py-3 rounded-2xl flex items-center gap-3 active:scale-95 transition-transform shadow-sm">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 flex items-center justify-center"><i data-lucide="receipt" class="w-5 h-5"></i></div>
+                        <span class="font-semibold text-sm pr-2">Send Invoice</span>
+                    </button>
+                </div>
+            `;
+            },
+            
+            clients: () => `
+                <div class="mb-6 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-3xl font-bold tracking-tight mb-1">Clients</h2>
+                        <p class="text-textSub-light dark:text-textSub-dark text-sm">Manage compliance profiles</p>
+                    </div>
+                    <button class="bg-primary text-white p-3 rounded-full shadow-lg shadow-primary/30">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                
+                <!-- Toggle & Sort -->
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex p-1 bg-gray-200/50 dark:bg-gray-800/50 rounded-2xl w-2/3 max-w-[240px]">
+                        <button class="flex-1 py-2 text-sm font-semibold bg-white dark:bg-gray-700 rounded-xl shadow-sm text-textMain-light dark:text-textMain-dark">Active</button>
+                        <button class="flex-1 py-2 text-sm font-medium text-textSub-light dark:text-textSub-dark hover:text-textMain-light dark:hover:text-textMain-dark transition-colors">Non Active</button>
+                    </div>
+                    <button class="flex items-center gap-2 p-2 bg-gray-200/50 dark:bg-gray-800/50 rounded-xl text-textMain-light dark:text-textMain-dark hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors shadow-sm">
+                        <i data-lucide="arrow-up-down" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    ${db.clients.map(client => `
+                        <div class="bg-card-light dark:bg-card-dark p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center justify-between active:scale-95 transition-transform cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-lg font-bold text-gray-500 flex-shrink-0">
+                                    ${client.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-lg leading-tight mb-0.5">${client.name}</h3>
+                                    <p class="text-textSub-light dark:text-textSub-dark text-sm font-medium">ID: CL-${String(client.id).padStart(4, '0')}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="w-10 h-10 rounded-full bg-green-50 dark:bg-green-500/10 text-green-600 flex items-center justify-center hover:bg-green-100 dark:hover:bg-green-500/20 transition-colors" onclick="event.stopPropagation()">
+                                    <i data-lucide="message-circle" class="w-5 h-5"></i>
+                                </button>
+                                <button class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors" onclick="event.stopPropagation()">
+                                    <i data-lucide="phone" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `,
+            
+            tasks: () => `
+                <div class="mb-6 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-3xl font-bold tracking-tight mb-1">Tasks</h2>
+                        <p class="text-textSub-light dark:text-textSub-dark text-sm">Your compliance checklist</p>
+                    </div>
+                    <button class="bg-primary text-white p-3 rounded-full shadow-lg shadow-primary/30">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex p-1 bg-gray-200/50 dark:bg-gray-800/50 rounded-2xl mb-6">
+                    <button class="flex-1 py-2 text-sm font-semibold bg-white dark:bg-gray-700 rounded-xl shadow-sm">Pending</button>
+                    <button class="flex-1 py-2 text-sm font-medium text-textSub-light dark:text-textSub-dark">Completed</button>
+                </div>
+
+                <div class="space-y-4">
+                    ${db.tasks.map(task => `
+                        <div class="bg-card-light dark:bg-card-dark p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4 ${task.completed ? 'opacity-60' : ''}">
+                            <button class="mt-1 w-6 h-6 rounded-full border-2 ${task.completed ? 'bg-primary border-primary text-white' : 'border-gray-300 dark:border-gray-600'} flex items-center justify-center flex-shrink-0">
+                                ${task.completed ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
+                            </button>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-lg ${task.completed ? 'line-through text-gray-400' : ''}">${task.title}</h3>
+                                <p class="text-textSub-light dark:text-textSub-dark text-sm mb-3">${task.client}</p>
+                                
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-1 text-xs font-medium px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-textSub-light dark:text-textSub-dark">
+                                        <i data-lucide="calendar" class="w-3 h-3"></i>
+                                        ${task.due}
+                                    </div>
+                                    ${!task.completed ? `
+                                        <div class="w-2 h-2 rounded-full ${task.priority === 'High' ? 'bg-primary' : task.priority === 'Medium' ? 'bg-amber-500' : 'bg-green-500'}"></div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `,
+            
+            transactions: () => `
+                <div class="mb-8 text-center pt-4">
+                    <p class="text-textSub-light dark:text-textSub-dark font-medium mb-1">Total Balance</p>
+                    <h2 class="text-5xl font-bold tracking-tight">₹34,567<span class="text-2xl text-gray-400">.90</span></h2>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-around mb-8 px-4">
+                    <button class="flex flex-col items-center gap-2">
+                        <div class="w-14 h-14 rounded-full bg-card-light dark:bg-card-dark border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-center text-textMain-light dark:text-textMain-dark active:scale-95 transition-transform">
+                            <i data-lucide="arrow-up" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-medium">Send</span>
+                    </button>
+                    <button class="flex flex-col items-center gap-2">
+                        <div class="w-14 h-14 rounded-full bg-card-light dark:bg-card-dark border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-center text-textMain-light dark:text-textMain-dark active:scale-95 transition-transform">
+                            <i data-lucide="plus" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-medium">Add</span>
+                    </button>
+                    <button class="flex flex-col items-center gap-2">
+                        <div class="w-14 h-14 rounded-full bg-card-light dark:bg-card-dark border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-center text-textMain-light dark:text-textMain-dark active:scale-95 transition-transform">
+                            <i data-lucide="arrow-down" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-medium">Request</span>
+                    </button>
+                    <button class="flex flex-col items-center gap-2">
+                        <div class="w-14 h-14 rounded-full bg-card-light dark:bg-card-dark border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-center text-textMain-light dark:text-textMain-dark active:scale-95 transition-transform">
+                            <i data-lucide="more-horizontal" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-medium">More</span>
+                    </button>
+                </div>
+
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h3 class="text-lg font-bold">Recent</h3>
+                    <button class="text-sm font-medium bg-gray-200/50 dark:bg-gray-800/50 px-3 py-1 rounded-full text-textMain-light dark:text-textMain-dark">See all</button>
+                </div>
+
+                <div class="bg-card-light dark:bg-card-dark rounded-3xl p-2 shadow-sm border border-gray-100 dark:border-gray-800">
+                    ${db.transactions.map((tx, index) => `
+                        <div class="flex items-center justify-between p-4 ${index !== db.transactions.length -1 ? 'border-b border-gray-100 dark:border-gray-800/50' : ''}">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full ${tx.type === 'in' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-primary/10 text-primary'} flex items-center justify-center shadow-inner">
+                                    <i data-lucide="${tx.type === 'in' ? 'arrow-down-left' : 'arrow-up-right'}" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-base">${tx.entity}</h4>
+                                    <p class="text-xs text-textSub-light dark:text-textSub-dark">${tx.date} • ${tx.status}</p>
+                                </div>
+                            </div>
+                            <div class="font-bold text-lg ${tx.type === 'in' ? 'text-emerald-500' : 'text-primary'}">
+                                ${tx.amount}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `,
+            
+            menu: () => `
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold tracking-tight mb-1">More</h2>
+                    <p class="text-textSub-light dark:text-textSub-dark text-sm">App settings & preferences</p>
+                </div>
+                
+                <div class="bg-card-light dark:bg-card-dark rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden mb-6">
+                    <div class="p-4 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800/50">
+                        <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold shadow-md shadow-primary/30">
+                            ${currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'JD'}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">${currentUser && currentUser.name ? currentUser.name : 'John Doe'}</h3>
+                            <p class="text-textSub-light dark:text-textSub-dark text-sm">${currentUser && currentUser.clientId ? currentUser.clientId : 'Compliance Officer'}</p>
+                        </div>
+                    </div>
+                    <div class="p-2">
+                        <button class="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                                <span class="font-medium">Profile Settings</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i>
+                        </button>
+                        <button class="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="bell" class="w-5 h-5 text-gray-400"></i>
+                                <span class="font-medium">Notifications</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-card-light dark:bg-card-dark rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+                    <div class="p-2">
+                         <button onclick="location.reload()" class="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left text-primary">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="log-out" class="w-5 h-5"></i>
+                                <span class="font-medium">Log Out</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            `
+        };
+
+        const mainContent = document.getElementById('main-content');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        function renderView(viewName) {
+            mainContent.innerHTML = views[viewName]();
+            lucide.createIcons();
+            
+            navItems.forEach(item => {
+                if (item.dataset.view === viewName) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                renderView(item.dataset.view);
+            });
+        });
+
+        mainContent.addEventListener('click', (e) => {
+            const calBtn = e.target.closest('.cal-date');
+            if (calBtn) {
+                const newDate = parseInt(calBtn.dataset.date);
+                if (selectedDate !== newDate) {
+                    selectedDate = newDate;
+                    renderView('dashboard');
+                }
+            }
+        });
+
+        const themeBtn = document.getElementById('btn-theme');
+        const html = document.documentElement;
+
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            html.classList.add('dark');
+        }
+
+        themeBtn.addEventListener('click', () => {
+            html.classList.toggle('dark');
+        });
+
+        
+        // Decodes JWT token payload safely
+        function decodeJwtResponse(token) {
+            try {
+                let base64Url = token.split('.')[1];
+                let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // The callback function executed after a successful Google Sign-in
+        window.handleCredentialResponse = (response) => {
+            const payload = decodeJwtResponse(response.credential);
+            if (payload && payload.email) {
+                verifyUserEmailWithBackend(payload.email);
+            } else {
+                showLoginError("Invalid Google login response.");
+            }
+        };
+
+        // Initialize Google Sign-in API once window loads
+        window.onload = function () {
+            // Render initial icons
+            lucide.createIcons();
+
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleCredentialResponse
+            });
+            
+            google.accounts.id.renderButton(
+                document.getElementById("google-btn-container"),
+                { theme: "outline", size: "large", shape: "pill", width: 250, text: "signin_with" }
+            );
+        };
+
+        // Event listener for manual form fallback (Admin Login)
+        document.getElementById('btn-manual-login').addEventListener('click', () => {
+            const emailInput = document.getElementById('admin-email').value;
+            if (emailInput.trim() === '') {
+                showLoginError("Please enter an email address.");
+                return;
+            }
+            verifyUserEmailWithBackend(emailInput);
+        });
+
+        function showLoginError(msg) {
+            const errEl = document.getElementById('login-error');
+            errEl.textContent = msg;
+            errEl.classList.remove('hidden');
+        }
+
+        // Verify the email against the Google Apps Script Backend (GET action=VERIFY_GOOGLE_LOGIN)
+        async function verifyUserEmailWithBackend(email) {
+            const btn = document.getElementById('btn-manual-login');
+            const errEl = document.getElementById('login-error');
+            
+            // Set loading state
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Verifying...</span>';
+            lucide.createIcons();
+            errEl.classList.add('hidden');
+
+            try {
+                const url = `${APPS_SCRIPT_URL}?action=VERIFY_GOOGLE_LOGIN&email=${encodeURIComponent(email)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.valid) {
+                    // Login successful!
+                    currentUser = data; // Save user data (Name, Client ID)
+                    
+                    // Update user initials in top header
+                    document.getElementById('user-initial').textContent = data.name ? data.name.charAt(0).toUpperCase() : 'A';
+                    
+                    // Hide login screen, reveal app
+                    document.getElementById('login-view').classList.add('hidden');
+                    const appView = document.getElementById('app-view');
+                    appView.classList.remove('hidden');
+                    appView.classList.add('flex');
+                    
+                    // Initialize Dashboard
+                    renderView('dashboard');
+                } else {
+                    // Login failed, email not found in sheet
+                    showLoginError(data.message || "Email not registered in Clients sheet.");
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+                showLoginError("Network error. Could not connect to backend.");
+            } finally {
+                // Reset button state
+                btn.innerHTML = '<span>Continue</span><i data-lucide="arrow-right" class="w-4 h-4"></i>';
+                lucide.createIcons();
+            }
+        }
+
+    </script>
+</body>
+</html>
