@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cm-taxapp-v1.02';
+const CACHE_NAME = 'cm-taxapp-v1.03';
 const urlsToCache = [
   './',
   './index.html',
