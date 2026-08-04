@@ -6,6 +6,7 @@
     <title>Flow - Compliance Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Identity Services for Auth -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
     <script>
@@ -62,36 +63,23 @@
         .pt-safe { padding-top: env(safe-area-inset-top); }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-textMain-light dark:text-textMain-dark font-sans h-screen flex flex-col overflow-hidden">
+<body class="bg-background-light dark:bg-background-dark text-textMain-light dark:text-textMain-dark font-sans h-screen overflow-hidden w-full">
 
-    <!-- Login View (Visible by default) -->
-    <div id="login-view" class="h-screen w-full flex items-center justify-center p-6 z-50">
-        <div class="bg-card-light dark:bg-card-dark p-8 rounded-4xl shadow-sm border border-gray-100 dark:border-gray-800 w-full max-w-sm text-center">
-            <div class="w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center font-bold text-3xl shadow-sm shadow-primary/40 mx-auto mb-4">F</div>
-            <h1 class="text-2xl font-bold mb-2">Flow</h1>
-            <p class="text-textSub-light dark:text-textSub-dark text-sm mb-8">Sign in to manage compliance</p>
-            
-            <!-- Google Auth Button Container -->
-            <div id="google-btn-container" class="flex justify-center mb-6 min-h-[40px]"></div>
-
-            <div class="relative flex py-2 items-center mb-6">
-                <div class="flex-grow border-t border-gray-200 dark:border-gray-800"></div>
-                <span class="flex-shrink-0 mx-4 text-textSub-light dark:text-textSub-dark text-xs font-medium uppercase tracking-wider">Or Admin Login</span>
-                <div class="flex-grow border-t border-gray-200 dark:border-gray-800"></div>
-            </div>
-
-            <!-- Manual Admin Login Fallback -->
-            <input type="email" id="admin-email" placeholder="Enter admin/client email" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:border-primary text-sm transition-colors text-textMain-light dark:text-textMain-dark">
-            <button id="btn-manual-login" class="w-full bg-primary text-white font-semibold rounded-xl px-4 py-3 active:scale-95 transition-transform flex items-center justify-center gap-2 shadow-sm shadow-primary/30">
-                <span>Continue</span>
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </button>
-            <p id="login-error" class="text-primary text-xs mt-4 hidden font-medium"></p>
-        </div>
+    <!-- LOGIN GATEWAY -->
+    <div id="login-view" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-6 transition-all duration-500">
+        <div class="w-24 h-24 bg-primary text-white rounded-[2rem] flex items-center justify-center font-bold text-5xl shadow-xl shadow-primary/30 mb-8 transform transition-transform hover:scale-105">F</div>
+        <h1 class="text-3xl font-bold tracking-tight mb-2">Welcome to Flow</h1>
+        <p class="text-textSub-light dark:text-textSub-dark mb-10 text-center font-medium">Secure Admin Gateway. <br>Please sign in to access the dashboard.</p>
+        
+        <!-- Google Button Render Target -->
+        <div id="google-login-btn" class="mb-4"></div>
+        
+        <!-- Status Message -->
+        <div id="login-status" class="mt-2 text-sm font-medium text-center h-5 hidden"></div>
     </div>
 
-    <!-- Main App View (Hidden until authenticated) -->
-    <div id="app-view" class="hidden flex-col h-screen overflow-hidden w-full">
+    <!-- MAIN APP CONTAINER (Hidden until authenticated) -->
+    <div id="app-view" class="hidden flex-col h-full w-full">
         <!-- Header -->
         <header class="pt-safe px-6 py-4 flex justify-between items-center bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md z-10 sticky top-0 border-b border-gray-200/50 dark:border-gray-800/50">
             <div class="flex items-center gap-2">
@@ -107,7 +95,7 @@
                     <i data-lucide="moon" class="w-6 h-6 block dark:hidden"></i>
                 </button>
                 <button class="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden flex items-center justify-center border-2 border-transparent focus:border-primary transition-colors">
-                    <span id="user-initial" class="font-bold text-sm text-gray-600 dark:text-gray-300">U</span>
+                    <i data-lucide="user" class="w-5 h-5 text-gray-500"></i>
                 </button>
             </div>
         </header>
@@ -146,13 +134,86 @@
 
     <!-- App Logic -->
     <script>
-        const GOOGLE_CLIENT_ID = "753272952222-c1pgj8cb8g7vte82sp6kevd3mku17cca.apps.googleusercontent.com";
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5VHAOIBC2rDv305WJJm-iuKfi9bjxvV-rRhR9E9mJcPeBgMBX6aYw-nbrWcGeQ6C0A/exec";
+        // --- AUTHENTICATION CONFIGURATION ---
+        const GOOGLE_CLIENT_ID = '753272952222-c1pgj8cb8g7vte82sp6kevd3mku17cca.apps.googleusercontent.com';
+        const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxY5VHAOIBC2rDv305WJJm-iuKfi9bjxvV-rRhR9E9mJcPeBgMBX6aYw-nbrWcGeQ6C0A/exec';
 
-        let currentUser = null;
+        // Decode JWT from Google Auth
+        function parseJwt(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        // Initialize Google Sign-in on load
+        window.onload = function () {
+            // Re-render lucide icons early for the header/nav
+            lucide.createIcons();
+
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleCredentialResponse
+            });
+            
+            google.accounts.id.renderButton(
+                document.getElementById("google-login-btn"),
+                { theme: document.documentElement.classList.contains('dark') ? "filled_black" : "outline", size: "large", shape: "pill", width: 280 }
+            );
+        };
+
+        // Handle the Google Sign In Response
+        async function handleCredentialResponse(response) {
+            const statusEl = document.getElementById('login-status');
+            statusEl.classList.remove('hidden');
+            statusEl.innerText = "Authenticating with server...";
+            statusEl.className = "mt-4 text-sm font-medium text-textSub-light dark:text-textSub-dark animate-pulse";
+
+            try {
+                // Decode the token to get the user's email
+                const data = parseJwt(response.credential);
+                const userEmail = data.email;
+
+                // Send request to your Apps Script to verify
+                const res = await fetch(`${APP_SCRIPT_URL}?action=VERIFY_GOOGLE_LOGIN&email=${encodeURIComponent(userEmail)}`);
+                const result = await res.json();
+
+                if (result.valid) {
+                    // Login Success
+                    statusEl.innerText = "Success! Loading dashboard...";
+                    statusEl.className = "mt-4 text-sm font-medium text-green-500";
+                    
+                    // Transition to App View
+                    setTimeout(() => {
+                        const loginView = document.getElementById('login-view');
+                        const appView = document.getElementById('app-view');
+                        
+                        loginView.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => {
+                            loginView.classList.add('hidden');
+                            appView.classList.remove('hidden');
+                            appView.classList.add('flex');
+                            renderView('dashboard'); // Render Home
+                        }, 500);
+                    }, 800);
+                } else {
+                    // Login Failed (Unauthorized)
+                    statusEl.innerText = "Access Denied: " + (result.message || "Unregistered Email");
+                    statusEl.className = "mt-4 text-sm font-medium text-primary";
+                }
+            } catch (err) {
+                console.error("Auth Error:", err);
+                statusEl.innerText = "Error connecting to server. Please try again.";
+                statusEl.className = "mt-4 text-sm font-medium text-primary";
+            }
+        }
+
+
+        // --- APP STATE & MOCK DATA ---
         let selectedDate = 4; // Default calendar selected date
 
-        // Mock Data for UI presentation
         const db = {
             clients: [
                 { id: 1, name: "Acme Corp", industry: "Finance", status: "Compliant" },
@@ -174,7 +235,7 @@
             ]
         };
 
-        // View Renderers
+        // --- VIEWS ---
         const views = {
             dashboard: () => {
                 const dayTasks = db.tasks.filter(t => t.date === selectedDate);
@@ -182,7 +243,7 @@
                 return `
                 <div class="mb-6 flex justify-between items-center">
                     <div>
-                        <h2 class="text-3xl font-bold tracking-tight mb-2">Dashboard</h2>
+                        <h2 class="text-3xl font-bold tracking-tight mb-1">Dashboard</h2>
                         <p class="text-textSub-light dark:text-textSub-dark text-sm">Overview & Schedule</p>
                     </div>
                     <button class="bg-gray-200/50 dark:bg-gray-800/50 text-textMain-light dark:text-textMain-dark p-3 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors shadow-sm">
@@ -193,14 +254,14 @@
                 <!-- Financial Summary & Task Donut (White backgrounds) -->
                 <div class="flex gap-3 mb-6 overflow-x-auto pb-2 -mx-2 px-2" style="-ms-overflow-style: none; scrollbar-width: none;">
                     
-                    <div class="flex-shrink-0 w-44 bg-card-light dark:bg-card-dark text-textMain-light dark:text-textMain-dark p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-center">
+                    <div class="flex-shrink-0 w-44 bg-card-light dark:bg-card-dark p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-center">
                         <div class="flex items-center gap-1 text-textSub-light dark:text-textSub-dark text-[11px] font-medium mb-1 uppercase tracking-wider">
                             <i data-lucide="wallet" class="w-3 h-3"></i> Total Balance
                         </div>
-                        <div class="text-xl font-bold">₹34,567.90</div>
+                        <div class="text-xl font-bold text-textMain-light dark:text-textMain-dark">₹34,567.90</div>
                     </div>
                     
-                    <div class="flex-shrink-0 w-32 bg-card-light dark:bg-card-dark p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-center relative overflow-hidden">
+                    <div class="flex-shrink-0 w-36 bg-card-light dark:bg-card-dark p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-primary/5 dark:bg-primary/10"></div>
                         <div class="relative z-10 flex items-center gap-1 text-primary/80 text-[11px] font-medium mb-1 uppercase tracking-wider">
                             <i data-lucide="alert-circle" class="w-3 h-3"></i> Pending Due
@@ -228,9 +289,9 @@
                     </div>
                     <div class="flex gap-2.5 overflow-x-auto pb-2 -mx-2 px-2" style="-ms-overflow-style: none; scrollbar-width: none;">
                         ${[2, 3, 4, 5, 6, 7, 8].map(day => `
-                            <button class="cal-date flex-shrink-0 w-12 h-14 rounded-[14px] flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${selectedDate === day ? 'bg-primary text-white shadow-md shadow-primary/40' : 'bg-card-light dark:bg-card-dark text-textSub-light dark:text-textSub-dark border border-gray-100 dark:border-gray-800'}" data-date="${day}">
+                            <button class="cal-date flex-shrink-0 w-[3.25rem] h-[4.25rem] rounded-[1rem] flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${selectedDate === day ? 'bg-primary text-white shadow-md shadow-primary/40' : 'bg-card-light dark:bg-card-dark text-textSub-light dark:text-textSub-dark border border-gray-100 dark:border-gray-800'}" data-date="${day}">
                                 <span class="text-[10px] font-medium uppercase tracking-wider ${selectedDate === day ? 'text-white/80' : ''}">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day%7]}</span>
-                                <span class="text-base font-bold ${selectedDate === day ? 'text-white' : 'text-textMain-light dark:text-textMain-dark'}">${day}</span>
+                                <span class="text-[1.1rem] font-bold ${selectedDate === day ? 'text-white' : 'text-textMain-light dark:text-textMain-dark'}">${day}</span>
                             </button>
                         `).join('')}
                     </div>
@@ -441,11 +502,11 @@
                 <div class="bg-card-light dark:bg-card-dark rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden mb-6">
                     <div class="p-4 flex items-center gap-4 border-b border-gray-100 dark:border-gray-800/50">
                         <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold shadow-md shadow-primary/30">
-                            ${currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'JD'}
+                            JD
                         </div>
                         <div>
-                            <h3 class="font-bold text-lg">${currentUser && currentUser.name ? currentUser.name : 'John Doe'}</h3>
-                            <p class="text-textSub-light dark:text-textSub-dark text-sm">${currentUser && currentUser.clientId ? currentUser.clientId : 'Compliance Officer'}</p>
+                            <h3 class="font-bold text-lg">John Doe</h3>
+                            <p class="text-textSub-light dark:text-textSub-dark text-sm">Compliance Officer</p>
                         </div>
                     </div>
                     <div class="p-2">
@@ -468,7 +529,7 @@
 
                 <div class="bg-card-light dark:bg-card-dark rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
                     <div class="p-2">
-                         <button onclick="location.reload()" class="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left text-primary">
+                         <button class="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left text-primary" onclick="location.reload()">
                             <div class="flex items-center gap-3">
                                 <i data-lucide="log-out" class="w-5 h-5"></i>
                                 <span class="font-medium">Log Out</span>
@@ -495,13 +556,15 @@
             });
         }
 
+        // Navigation Bindings
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 renderView(item.dataset.view);
             });
         });
 
-        mainContent.addEventListener('click', (e) => {
+        // Calendar Binding
+        document.getElementById('app-view').addEventListener('click', (e) => {
             const calBtn = e.target.closest('.cal-date');
             if (calBtn) {
                 const newDate = parseInt(calBtn.dataset.date);
@@ -512,6 +575,7 @@
             }
         });
 
+        // Theme Logic
         const themeBtn = document.getElementById('btn-theme');
         const html = document.documentElement;
 
@@ -522,107 +586,6 @@
         themeBtn.addEventListener('click', () => {
             html.classList.toggle('dark');
         });
-
-        
-        // Decodes JWT token payload safely
-        function decodeJwtResponse(token) {
-            try {
-                let base64Url = token.split('.')[1];
-                let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                return JSON.parse(jsonPayload);
-            } catch (e) {
-                return null;
-            }
-        }
-
-        // The callback function executed after a successful Google Sign-in
-        window.handleCredentialResponse = (response) => {
-            const payload = decodeJwtResponse(response.credential);
-            if (payload && payload.email) {
-                verifyUserEmailWithBackend(payload.email);
-            } else {
-                showLoginError("Invalid Google login response.");
-            }
-        };
-
-        // Initialize Google Sign-in API once window loads
-        window.onload = function () {
-            // Render initial icons
-            lucide.createIcons();
-
-            google.accounts.id.initialize({
-                client_id: GOOGLE_CLIENT_ID,
-                callback: handleCredentialResponse
-            });
-            
-            google.accounts.id.renderButton(
-                document.getElementById("google-btn-container"),
-                { theme: "outline", size: "large", shape: "pill", width: 250, text: "signin_with" }
-            );
-        };
-
-        // Event listener for manual form fallback (Admin Login)
-        document.getElementById('btn-manual-login').addEventListener('click', () => {
-            const emailInput = document.getElementById('admin-email').value;
-            if (emailInput.trim() === '') {
-                showLoginError("Please enter an email address.");
-                return;
-            }
-            verifyUserEmailWithBackend(emailInput);
-        });
-
-        function showLoginError(msg) {
-            const errEl = document.getElementById('login-error');
-            errEl.textContent = msg;
-            errEl.classList.remove('hidden');
-        }
-
-        // Verify the email against the Google Apps Script Backend (GET action=VERIFY_GOOGLE_LOGIN)
-        async function verifyUserEmailWithBackend(email) {
-            const btn = document.getElementById('btn-manual-login');
-            const errEl = document.getElementById('login-error');
-            
-            // Set loading state
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Verifying...</span>';
-            lucide.createIcons();
-            errEl.classList.add('hidden');
-
-            try {
-                const url = `${APPS_SCRIPT_URL}?action=VERIFY_GOOGLE_LOGIN&email=${encodeURIComponent(email)}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.valid) {
-                    // Login successful!
-                    currentUser = data; // Save user data (Name, Client ID)
-                    
-                    // Update user initials in top header
-                    document.getElementById('user-initial').textContent = data.name ? data.name.charAt(0).toUpperCase() : 'A';
-                    
-                    // Hide login screen, reveal app
-                    document.getElementById('login-view').classList.add('hidden');
-                    const appView = document.getElementById('app-view');
-                    appView.classList.remove('hidden');
-                    appView.classList.add('flex');
-                    
-                    // Initialize Dashboard
-                    renderView('dashboard');
-                } else {
-                    // Login failed, email not found in sheet
-                    showLoginError(data.message || "Email not registered in Clients sheet.");
-                }
-            } catch (error) {
-                console.error("Auth Error:", error);
-                showLoginError("Network error. Could not connect to backend.");
-            } finally {
-                // Reset button state
-                btn.innerHTML = '<span>Continue</span><i data-lucide="arrow-right" class="w-4 h-4"></i>';
-                lucide.createIcons();
-            }
-        }
 
     </script>
 </body>
