@@ -40,6 +40,25 @@
         }
     </script>
     <style>
+        <!-- ... existing code ... -->
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- SPLASH SCREEN LOGIC START ---
+            const splash = document.getElementById('splash');
+            if (splash) {
+                // Wait 1.5 seconds, then start the fade out
+                setTimeout(() => {
+                    splash.style.opacity = '0';
+                    // Wait 500ms for the fade transition to finish, then remove the HTML
+                    setTimeout(() => splash.remove(), 500); 
+                }, 1500);
+            }
+            // --- SPLASH SCREEN LOGIC END ---
+
+            const savedSession = localStorage.getItem('taxAppSession');
+// ... existing code ...
         body { font-family: 'Inter', sans-serif; background-color: var(--tw-colors-brand-bg); -webkit-tap-highlight-color: transparent; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
