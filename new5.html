@@ -1,0 +1,53 @@
+<!-- ... existing code ... -->
+        // --- ITR FORM LOGIC ---
+        let itrStep = 1;
+        function changeItrStep(dir) {
+<!-- ... existing code ... -->
+            document.getElementById('btnItrSubmit').style.display = itrStep === 3 ? 'block' : 'none';
+        }
+
+        function generateAppNo(prefix) {
+            const now = new Date();
+            const yy = String(now.getFullYear()).slice(-2);
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            
+            let seq = parseInt(localStorage.getItem(prefix + '_seq') || '0', 10) + 1;
+            localStorage.setItem(prefix + '_seq', seq.toString());
+            
+            const seqStr = String(seq).padStart(4, '0');
+            
+            // Format: PREFIX + YY + 4 + SEQUENCE + / + MMDDHH
+            return `${prefix}${yy}4${seqStr}/${mm}${dd}${hh}`;
+        }
+
+        async function submitItrFinal() {
+            const btn = document.getElementById('btnItrSubmit'); btn.disabled = true; btn.innerHTML = 'Submitting...';
+            try {
+                const appNo = generateAppNo('ITR');
+                const payload = { action: 'ITR', ApplicationNo: appNo, Name: document.getElementById('itrName').value, PAN: document.getElementById('itrPan').value, FY: document.getElementById('itrFy').value, Mobile: document.getElementById('itrMobile').value, Email: document.getElementById('itrEmail').value, HeadOfIncome: document.getElementById('itrHead').value };
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
+                showSuccessModal(appNo); document.getElementById('itrForm').reset(); itrStep=1; changeItrStep(0);
+            } catch(e) { showToast("Error submitting.", true); }
+            btn.disabled = false; btn.innerHTML = 'Submit Application';
+        }
+
+        // --- GST FORM LOGIC ---
+<!-- ... existing code ... -->
+            document.getElementById('btnGstSubmit').style.display = gstStep === 3 ? 'block' : 'none';
+        }
+
+        async function submitGstFinal() {
+            const btn = document.getElementById('btnGstSubmit'); btn.disabled = true; btn.innerHTML = 'Submitting...';
+            try {
+                const appNo = generateAppNo('GST');
+                const payload = { action: 'GST', ApplicationNo: appNo, Name: document.getElementById('gstName').value, GSTIN: document.getElementById('gstinNo').value, FY: document.getElementById('gstFy').value, ReturnMonth: document.getElementById('gstMonth').value };
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
+                showSuccessModal(appNo); document.getElementById('gstForm').reset(); gstStep=1; changeGstStep(0);
+            } catch(e) { showToast("Error submitting.", true); }
+            btn.disabled = false; btn.innerHTML = 'Submit GST';
+        }
+
+        // --- PAYMENT TRANSACTIONS LOGIC ---
+<!-- ... existing code ... -->
