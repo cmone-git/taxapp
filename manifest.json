@@ -1,24 +1,21 @@
 {
-  "name": "CM TaxApp Corporate Dashboard",
+  "name": "CM TAXAPP",
   "short_name": "CM TaxApp",
-  "description": "Corporate Tax Filing and Management Dashboard by CMFilings.",
+  "description": "TAXAPP by CM Filings",
   "start_url": "./index.html",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0B1120",
-  "theme_color": "#111827",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "assets/logo.png",
+      "src": "assets/logo-app.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "assets/logo.png",
+      "src": "assets/logo-app.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
