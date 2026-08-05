@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CM Calc</title>
+    
+    <!-- PWA Manifest and Icons -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="apple-touch-icon" href="assets/logo.png">
+    <meta name="theme-color" content="#1a1b1c">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -22,7 +29,7 @@
             --menu-border: #333333;
             --menu-hover: #333435;
             
-            /* Screen: Dark Teal */
+            /* Screen */
             --screen-bg: linear-gradient(180deg, #0f282f 0%, #12333b 100%);
             --screen-text: #ffffff;
             --screen-text-muted: #5e848d;
@@ -35,7 +42,7 @@
             
             /* Button Variants */
             --btn-num: linear-gradient(180deg, #333435 0%, #1e1e1f 100%);
-            --btn-num-text: #b3b3b3; /* Grey text in night mode */
+            --btn-num-text: #b3b3b3; 
             
             --btn-mem: linear-gradient(180deg, #363636 0%, #262626 100%);
             --btn-mem-text: #909090;
@@ -63,7 +70,7 @@
             --menu-border: #caced1;
             --menu-hover: #e4e6e8;
             
-            /* Screen: Light Blueish Grey */
+            /* Screen */
             --screen-bg: linear-gradient(180deg, #a4c1cf 0%, #89adb9 100%);
             --screen-text: #111111;
             --screen-text-muted: #3a545e;
@@ -76,7 +83,7 @@
             
             /* Button Variants */
             --btn-num: linear-gradient(180deg, #f2f2f2 0%, #d8d8d8 100%);
-            --btn-num-text: #111111; /* Black text in light mode */
+            --btn-num-text: #111111; 
             
             --btn-mem: linear-gradient(180deg, #a7b2c2 0%, #8b97a8 100%);
             --btn-mem-text: #ffffff;
@@ -99,7 +106,6 @@
         }
 
         body { 
-            /* Brushed metal effect */
             background-color: var(--bg-base);
             background-image: 
                 repeating-linear-gradient(90deg, transparent 0px, transparent 1px, var(--bg-metal-1) 1px, var(--bg-metal-1) 3px),
@@ -125,7 +131,7 @@
         /* 3D Button Style */
         .calc-btn {
             display: flex; align-items: center; justify-content: center;
-            border-radius: 8px; font-weight: 500; /* Made buttons bolder */
+            border-radius: 8px; font-weight: 500; 
             cursor: pointer; user-select: none;
             border: 1px solid var(--btn-border);
             box-shadow: var(--btn-shadow);
@@ -139,7 +145,6 @@
             filter: brightness(0.9);
         }
 
-        /* Specific Button Classes */
         .btn-num { background: var(--btn-num); color: var(--btn-num-text); font-size: 2.25rem; font-weight: 500; }
         .btn-mem { background: var(--btn-mem); color: var(--btn-mem-text); font-size: 1.25rem; font-weight: 500; }
         .btn-op { background: var(--btn-op); color: var(--btn-op-text); font-size: 2.25rem; }
@@ -163,17 +168,33 @@
         .hover-menu:hover {
             background-color: var(--menu-hover);
         }
+
+        /* Splash Screen Base Styles */
+        #splash-screen {
+            background-color: var(--bg-base);
+        }
     </style>
 </head>
 
 <body class="w-full p-3 sm:p-4">
+    
+    <!-- Splash Screen Overlay -->
+    <div id="splash-screen" class="fixed inset-0 z-[999] flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out">
+        <div class="flex flex-col items-center justify-center gap-6 animate-pulse">
+            <img src="assets/logo.png" alt="CMCalc Logo" class="w-24 h-24 sm:w-32 sm:h-32 object-contain drop-shadow-xl rounded-2xl">
+            <img src="assets/name.png" alt="CMCalc Name" class="w-48 sm:w-64 aspect-[3/1] object-contain drop-shadow-md">
+        </div>
+    </div>
+
     <main class="w-full max-w-[400px] flex flex-col gap-3 flex-1 mx-auto h-full relative">
         
         <header class="flex items-center justify-between px-1 pt-1 flex-shrink-0 relative z-40">
             <i data-lucide="menu" class="w-7 h-7 cursor-pointer" style="color: var(--text-header);"></i>
-            <h1 class="text-xl tracking-wide font-normal" style="color: var(--text-header);">
-                <span class="font-bold" style="color: var(--text-cm);">CM</span> Calc
-            </h1>
+            
+            <!-- Replaced Text Header with Image Header (1x3 ratio) -->
+            <div class="flex-1 flex justify-center ml-2 mr-4">
+                <img src="assets/name.png" alt="CM Calc" class="h-8 w-24 object-contain">
+            </div>
             
             <div class="flex items-center gap-2">
                 <button onclick="toggleTheme()" class="focus:outline-none p-2 rounded-lg border flex items-center justify-center active:scale-90 transition-transform" style="background: var(--btn-num); border-color: var(--btn-border); box-shadow: var(--btn-shadow);">
@@ -185,14 +206,31 @@
                 </button>
             </div>
 
-            <div id="dropdownMenu" class="hidden absolute top-12 right-0 rounded-lg shadow-2xl border p-1 min-w-[140px] transition-colors z-50" style="background: var(--menu-bg); color: var(--menu-text); border-color: var(--menu-border);">
-                <div class="py-2.5 px-3 cursor-pointer rounded text-base font-medium transition-colors hover-menu" onclick="showAbout()">
-                    About App
+            <!-- Enhanced Menu Dropdown -->
+            <div id="dropdownMenu" class="hidden absolute top-12 right-0 rounded-lg shadow-2xl border p-1 min-w-[200px] transition-colors z-50" style="background: var(--menu-bg); color: var(--menu-text); border-color: var(--menu-border);">
+                
+                <div id="installAppBtn" class="hidden py-3 px-4 cursor-pointer rounded text-base font-medium transition-colors hover-menu flex items-center gap-3" onclick="installApp()">
+                    <i data-lucide="download" class="w-5 h-5"></i> Install App
                 </div>
+                
+                <div class="py-3 px-4 cursor-pointer rounded text-base font-medium transition-colors hover-menu flex items-center gap-3" onclick="refreshApp()">
+                    <i data-lucide="refresh-cw" class="w-5 h-5"></i> Refresh / Update
+                </div>
+                
                 <div class="w-full border-t my-1" style="border-color: var(--menu-border);"></div>
-                <div class="py-2 px-3 text-sm font-medium opacity-60 pointer-events-none">
-                    Version 1.0
+
+                <div class="py-3 px-4 cursor-pointer rounded text-base font-medium transition-colors hover-menu flex items-center gap-3" onclick="shareApp()">
+                    <i data-lucide="share-2" class="w-5 h-5"></i> Share App
                 </div>
+                
+                <a href="https://cmfilings.com" target="_blank" class="py-3 px-4 cursor-pointer rounded text-base font-medium transition-colors hover-menu flex items-center gap-3 no-underline" style="color: var(--menu-text);">
+                    <i data-lucide="external-link" class="w-5 h-5"></i> More tools from CM
+                </a>
+                
+                <div class="py-3 px-4 cursor-pointer rounded text-base font-medium transition-colors hover-menu flex items-center gap-3" onclick="showAbout()">
+                    <i data-lucide="info" class="w-5 h-5"></i> About App
+                </div>
+
             </div>
         </header>
         
@@ -251,7 +289,9 @@
 
     <div id="aboutModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 opacity-0 transition-opacity duration-300">
         <div class="rounded-xl shadow-2xl p-6 w-full max-w-[320px] text-center transform scale-95 transition-transform duration-300" style="background: var(--menu-bg); border: 1px solid var(--menu-border);">
-            <h2 class="text-3xl font-normal mb-1" style="color: var(--text-header);"><span class="font-bold" style="color: var(--text-cm);">CM</span> Calc</h2>
+            <div class="flex justify-center mb-4">
+                <img src="assets/name.png" alt="CM Calc" class="h-10 object-contain">
+            </div>
             <p class="text-sm mb-5" style="color: var(--screen-text-muted);">Classic. Simple. Powerful.</p>
             <p class="text-base font-medium mb-6" style="color: var(--text-header);">Version 1.0</p>
             <button onclick="closeAbout()" class="w-full py-2.5 rounded-lg font-bold transition-transform active:scale-95 shadow-md" style="background: var(--btn-orange); color: var(--btn-orange-text);">Close</button>
@@ -259,6 +299,73 @@
     </div>
 
     <script>
+        // --- Service Worker Registration & App Install Logic ---
+        let deferredPrompt;
+        
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('ServiceWorker registered'))
+                    .catch(error => console.log('ServiceWorker registration failed:', error));
+            });
+        }
+
+        // Show install button if app is installable
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installAppBtn').classList.remove('hidden');
+        });
+
+        function installApp() {
+            dropdownMenu.classList.add('hidden');
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('installAppBtn').classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        function refreshApp() {
+            // Unregister service workers and refresh page to download updates
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.update();
+                    }
+                });
+            }
+            // Force reload skipping cache
+            window.location.reload(true);
+        }
+
+        // --- Share App Logic ---
+        function shareApp() {
+            dropdownMenu.classList.add('hidden');
+            if (navigator.share) {
+                navigator.share({
+                    title: 'CMCalc',
+                    text: 'Check out CMCalc - A Classic, Simple, and Powerful Calculator App!',
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                alert('Native sharing is not supported on this browser. Copy the URL to share!');
+            }
+        }
+
+        // --- Splash Screen Logic ---
+        window.addEventListener('load', () => {
+            const splash = document.getElementById('splash-screen');
+            setTimeout(() => {
+                splash.classList.add('opacity-0');
+                setTimeout(() => splash.remove(), 500);
+            }, 1200);
+        });
+
         // Initialize Icons
         lucide.createIcons();
 
@@ -269,7 +376,6 @@
             dropdownMenu.classList.toggle('hidden');
         }
         
-        // Hide menu on outside click
         document.addEventListener('click', (event) => {
             if (!dropdownMenu.contains(event.target) && !dropdownMenu.classList.contains('hidden')) {
                 dropdownMenu.classList.add('hidden');
@@ -283,7 +389,6 @@
         function showAbout() {
             dropdownMenu.classList.add('hidden');
             aboutModal.classList.remove('hidden');
-            // Small delay to allow CSS transitions to trigger
             setTimeout(() => {
                 aboutModal.classList.remove('opacity-0');
                 modalContent.classList.remove('scale-95');
@@ -354,7 +459,6 @@
                 }
                 prev = current; op = key;
                 let sym = {'+':'+','-':'−','*':'×','/':'÷'}[key];
-                // Put expression at the bottom
                 exprEl.textContent = fmt(prev) + ' ' + sym;
                 reset = true;
             }
