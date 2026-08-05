@@ -1,0 +1,23 @@
+{
+  "name": "CMCalc",
+  "short_name": "CMCalc",
+  "description": "CMCalc - Professional Calculator",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#df483a",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
