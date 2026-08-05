@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CM Tax Hub</title>
+    
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <meta name="theme-color" content="#ffffff">
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Identity Services for Login -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { yellow: '#F59E0B', red: '#DC2626', slate: '#1e2235', bg: '#F8FAFC' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: var(--tw-colors-brand-bg); -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .corp-input, .corp-select {
+            width: 100%; border: 1px solid #f1f5f9; border-radius: 12px; padding: 14px 18px;
+            font-size: 15px; color: #0F172A; background: #f8fafc; transition: all 0.2s ease; outline: none;
+        }
+        .corp-input:focus, .corp-select:focus { border-color: #1e2235; background: #ffffff; }
+        .corp-input[readonly] { background: #f1f5f9; color: #64748B; cursor: not-allowed; }
+        
+        .file-upload-wrapper { position: relative; border: 1px dashed #CBD5E1; border-radius: 12px; padding: 20px; text-align: center; background: #f8fafc; cursor: pointer; transition: all 0.2s; }
+        .file-upload-wrapper:hover { border-color: #F59E0B; background: #FFFBEB; }
+        .file-upload-wrapper input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+        .step-active { color: #DC2626; font-weight: 700; border-bottom: 2px solid #DC2626; }
+        .step-inactive { color: #94A3B8; font-weight: 500; border-bottom: 2px solid transparent; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 999999; display: flex; align-items: center; gap: 10px; color: #FFF; border: none; white-space: nowrap; }
+        .toast.success { background: #1e2235; }
+        .toast.error { background: #DC2626; }
+        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        
+        .full-modal { position: fixed; inset: 0; background: #ffffff; z-index: 100; overflow-y: auto; display: none; flex-direction: column; }
+        .full-modal.active { display: flex; animation: fadeIn 0.2s ease-out; }
+    </style>
+</head>
+<body class="text-brand-slate min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- Splash Screen -->
+    <div id="splash" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-24 h-24 bg-brand-slate rounded-3xl flex items-center justify-center animate-pulse">
+            <h1 class="text-white font-black text-4xl">CM</h1>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header id="app-header" class="fixed top-0 left-0 w-full z-[80] bg-white shadow-sm border-b border-gray-100 h-[64px] px-5 flex justify-between items-center hidden">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('dashboard')">
+            <div class="w-8 h-8 bg-brand-slate rounded-lg flex items-center justify-center text-white font-black text-xs tracking-wider">CM</div>
+            <span class="font-bold text-lg tracking-tight">Tax Hub</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="openModal('modal-taxupdates')" class="relative w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition">
+                <i data-lucide="bell" class="w-4 h-4"></i>
+                <span class="absolute top-2 right-2 w-2 h-2 bg-brand-red rounded-full"></span>
+            </button>
+            <button onclick="openModal('modal-clients')" class="w-9 h-9 rounded-full border border-gray-200 bg-white overflow-hidden flex items-center justify-center shadow-sm">
+                <img id="headerAvatarImg" src="assets/logo.png" class="w-full h-full object-cover" alt="Profile">
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Router View -->
+    <main id="app-main" class="flex-grow pt-[64px] pb-[80px] relative bg-white">
+        
+        <!-- LOGIN VIEW -->
+        <div id="view-login" class="view-section min-h-screen flex flex-col bg-brand-slate justify-center px-5 -mt-[64px]">
+            <div class="bg-white rounded-[32px] w-full max-w-[420px] p-8 shadow-2xl relative flex flex-col items-center mx-auto text-center">
+                <div class="w-20 h-20 bg-brand-slate rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                    <h1 class="text-white font-black text-3xl">CM</h1>
+                </div>
+                <h1 class="text-2xl font-black text-brand-slate tracking-tight mb-2">Welcome Back!</h1>
+                <p class="text-gray-500 text-sm mb-8 leading-relaxed font-medium">Sign in to Continue</p>
+                <div id="googleAuthContainer" class="w-full flex justify-center mb-4 min-h-[44px]"></div>
+                <p class="text-xs text-gray-400 text-center mt-4 px-4">Secure access authenticated via Google. By continuing, you agree to our Privacy Policy.</p>
+            </div>
+        </div>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="view-dashboard" class="view-section hidden px-5 w-full max-w-[600px] mx-auto space-y-8 pt-6">
+            
+            <!-- Welcome -->
+            <div>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Welcome Back</p>
+                <h1 id="welcomeName" class="text-3xl font-black text-brand-slate tracking-tight leading-tight truncate">Name</h1>
+            </div>
+
+            <!-- Next Compliance Calendar Grid -->
+            <div>
+                <div class="flex justify-between items-end mb-4 px-1">
+                    <h3 class="text-lg font-bold text-brand-slate">Next Compliance</h3>
+                    <button onclick="openModal('modal-calendar')" class="text-xs font-bold text-brand-yellow hover:text-yellow-600">View Calendar</button>
+                </div>
+                <div class="grid grid-cols-2 gap-3" id="dashCalendarGrid">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+
+            <!-- Quick Tools -->
+            <div>
+                <h3 class="text-lg font-bold text-brand-slate mb-4 px-1">Quick Tools</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-blue-50/40 rounded-[20px] p-5 border border-blue-100/50 cursor-pointer hover:shadow-sm transition" onclick="openModal('modal-itr')">
+                        <i data-lucide="file-text" class="w-6 h-6 text-blue-600 mb-3"></i>
+                        <h4 class="text-sm font-bold text-brand-slate">Income Tax</h4>
+                    </div>
+                    <div class="bg-green-50/40 rounded-[20px] p-5 border border-green-100/50 cursor-pointer hover:shadow-sm transition" onclick="openModal('modal-gst')">
+                        <i data-lucide="file-check-2" class="w-6 h-6 text-green-600 mb-3"></i>
+                        <h4 class="text-sm font-bold text-brand-slate">GST Filing</h4>
+                    </div>
+                    <div class="bg-purple-50/40 rounded-[20px] p-5 border border-purple-100/50 cursor-pointer hover:shadow-sm transition" onclick="openModal('modal-payment')">
+                        <i data-lucide="calculator" class="w-6 h-6 text-purple-600 mb-3"></i>
+                        <h4 class="text-sm font-bold text-brand-slate">TDS & TCS</h4>
+                    </div>
+                    <div class="bg-yellow-50/40 rounded-[20px] p-5 border border-yellow-100/50 cursor-pointer hover:shadow-sm transition" onclick="openModal('modal-taxupdates')">
+                        <i data-lucide="briefcase" class="w-6 h-6 text-yellow-600 mb-3"></i>
+                        <h4 class="text-sm font-bold text-brand-slate">Others</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Status / My Filings -->
+            <div>
+                <div class="flex justify-between items-end mb-4 px-1">
+                    <h3 class="text-lg font-bold text-brand-slate">Recent Filings</h3>
+                    <button onclick="openModal('modal-clients')" class="text-xs font-bold text-brand-yellow hover:text-yellow-600">See All</button>
+                </div>
+                <div id="dashStatusGrid" class="grid grid-cols-1 gap-3">
+                    <div class="text-center text-sm text-gray-400 py-4"><i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i></div>
+                </div>
+            </div>
+            
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav id="app-mobnav" class="fixed bottom-0 w-full bg-white border-t border-gray-100 px-6 h-[70px] flex justify-between items-center z-[80] hidden">
+        <a href="#" onclick="navigateTo('dashboard')" class="flex flex-col items-center text-brand-slate"><i data-lucide="layout-dashboard" class="w-6 h-6"></i><span class="text-[10px] font-bold mt-1">Home</span></a>
+        <a href="#" onclick="openModal('modal-payment')" class="flex flex-col items-center text-gray-400 hover:text-brand-slate"><i data-lucide="indian-rupee" class="w-6 h-6"></i><span class="text-[10px] font-bold mt-1">Pay</span></a>
+        <a href="#" onclick="openModal('modal-clients')" class="flex flex-col items-center text-gray-400 hover:text-brand-slate"><i data-lucide="folder-check" class="w-6 h-6"></i><span class="text-[10px] font-bold mt-1">Filings</span></a>
+        <a href="#" onclick="openMenu()" class="flex flex-col items-center text-gray-400 hover:text-brand-slate"><i data-lucide="menu" class="w-6 h-6"></i><span class="text-[10px] font-bold mt-1">Menu</span></a>
+    </nav>
+
+    <!-- Slide-in Menu -->
+    <div id="sideMenu" class="fixed inset-0 z-[120] hidden">
+        <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="closeMenu()"></div>
+        <div class="absolute inset-y-0 right-0 w-[80%] max-w-sm bg-white shadow-2xl flex flex-col transition-transform transform translate-x-full duration-300" id="sideMenuContent">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-brand-slate text-white">
+                <div>
+                    <h2 id="menuName" class="font-bold text-lg">Name</h2>
+                    <p id="menuId" class="text-xs text-gray-300 font-mono mt-1">CID</p>
+                </div>
+                <button onclick="closeMenu()"><i data-lucide="x" class="w-6 h-6 text-white"></i></button>
+            </div>
+            <div class="flex-grow p-5 space-y-2 overflow-y-auto">
+                <a href="#" onclick="closeMenu(); openModal('modal-itr')" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl font-semibold text-sm text-brand-slate"><i data-lucide="file-text" class="w-5 h-5 text-gray-400"></i> Income Tax</a>
+                <a href="#" onclick="closeMenu(); openModal('modal-gst')" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl font-semibold text-sm text-brand-slate"><i data-lucide="file-check-2" class="w-5 h-5 text-gray-400"></i> GST Filing</a>
+                <a href="#" onclick="closeMenu(); openModal('modal-calendar')" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl font-semibold text-sm text-brand-slate"><i data-lucide="calendar" class="w-5 h-5 text-gray-400"></i> Calendar</a>
+            </div>
+            <div class="p-6 border-t border-gray-100">
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-50 text-brand-red font-bold py-3.5 rounded-xl text-sm"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================================== -->
+    <!-- FULL SCREEN MODALS -->
+    <!-- ============================================== -->
+
+    <!-- ITR MODAL -->
+    <div id="modal-itr" class="full-modal">
+        <div class="px-5 h-[64px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10 shrink-0">
+            <h3 class="font-bold text-lg text-brand-slate">File Income Tax</h3>
+            <button onclick="closeModal('modal-itr')"><i data-lucide="x" class="w-6 h-6 text-gray-500"></i></button>
+        </div>
+        <div class="flex-grow overflow-y-auto p-5 pb-[100px] bg-white">
+            <form id="form-itr" class="max-w-[600px] mx-auto space-y-6">
+                <!-- Nav -->
+                <div class="flex justify-between border-b border-gray-200 pb-0 mb-6">
+                    <div id="nav-itr-1" class="w-1/3 text-center text-sm step-active pb-3">1. Personal</div>
+                    <div id="nav-itr-2" class="w-1/3 text-center text-sm step-inactive pb-3">2. Details</div>
+                    <div id="nav-itr-3" class="w-1/3 text-center text-sm step-inactive pb-3">3. Upload</div>
+                </div>
+                <!-- Step 1 -->
+                <div id="step-itr-1" class="space-y-4">
+                    <input type="text" id="itrName" class="corp-input" readonly placeholder="Name *">
+                    <input type="text" id="itrPan" class="corp-input uppercase font-mono" placeholder="PAN *" maxlength="10" required>
+                    <input type="tel" id="itrMobile" class="corp-input" placeholder="Mobile Number *" maxlength="10" required>
+                    <input type="email" id="itrEmail" class="corp-input" readonly placeholder="Email *">
+                </div>
+                <!-- Step 2 -->
+                <div id="step-itr-2" class="space-y-4 hidden">
+                    <select id="itrAy" class="corp-select" required>
+                        <option value="" disabled selected>Assessment Year *</option>
+                        <option value="2026-27">2026-27</option>
+                        <option value="2025-26">2025-26</option>
+                    </select>
+                    <select id="itrType" class="corp-select" required>
+                        <option value="" disabled selected>Return Type *</option>
+                        <option value="ITR1">ITR-1 (Sahaj)</option>
+                        <option value="ITR2">ITR-2</option>
+                        <option value="ITR3">ITR-3</option>
+                        <option value="ITR4">ITR-4 (Sugam)</option>
+                        <option value="ITR5">ITR-5</option>
+                        <option value="ITR6">ITR-6</option>
+                        <option value="ITR7">ITR-7</option>
+                        <option value="ITRU">ITR-U (Updated)</option>
+                    </select>
+                </div>
+                <!-- Step 3 -->
+                <div id="step-itr-3" class="hidden">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="file-upload-wrapper"><span class="text-xs font-bold block text-brand-slate mb-1">Bank Stmt</span><input type="file" id="itrBank" required></div>
+                        <div class="file-upload-wrapper"><span class="text-xs font-bold block text-brand-slate mb-1">Form 16</span><input type="file" id="itrForm16"></div>
+                        <div class="file-upload-wrapper"><span class="text-xs font-bold block text-brand-slate mb-1">P&L Stmt</span><input type="file" id="itrPnl"></div>
+                        <div class="file-upload-wrapper"><span class="text-xs font-bold block text-brand-slate mb-1">Others</span><input type="file" id="itrOthers"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="fixed bottom-0 w-full p-4 bg-white border-t border-gray-100 flex gap-3 z-20">
+            <button id="btn-itr-back" onclick="navStep('itr', -1)" class="w-1/3 bg-gray-50 text-brand-slate font-bold py-4 rounded-2xl hidden">Back</button>
+            <button id="btn-itr-next" onclick="navStep('itr', 1)" class="flex-1 bg-brand-slate text-white font-bold py-4 rounded-2xl shadow-md">Next Step</button>
+            <button id="btn-itr-submit" onclick="submitCompliance('ITR')" class="flex-1 bg-brand-slate text-white font-bold py-4 rounded-2xl shadow-md hidden">Submit</button>
+        </div>
+    </div>
+
+    <!-- GST MODAL -->
+    <div id="modal-gst" class="full-modal">
+        <div class="px-5 h-[64px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10 shrink-0">
+            <h3 class="font-bold text-lg text-brand-slate">File GST</h3>
+            <button onclick="closeModal('modal-gst')"><i data-lucide="x" class="w-6 h-6 text-gray-500"></i></button>
+        </div>
+        <div class="flex-grow overflow-y-auto p-5 pb-[100px] bg-white">
+            <form id="form-gst" class="max-w-[600px] mx-auto space-y-6">
+                <!-- Nav -->
+                <div class="flex justify-between border-b border-gray-200 pb-0 mb-6">
+                    <div id="nav-gst-1" class="w-1/3 text-center text-sm step-active pb-3">1. Firm</div>
+                    <div id="nav-gst-2" class="w-1/3 text-center text-sm step-inactive pb-3">2. Period</div>
+                    <div id="nav-gst-3" class="w-1/3 text-center text-sm step-inactive pb-3">3. Upload</div>
+                </div>
+                <!-- Step 1 -->
+                <div id="step-gst-1" class="space-y-4">
+                    <input type="text" id="gstName" class="corp-input bg-gray-50" readonly placeholder="Firm Name *">
+                    <input type="text" id="gstinNo" class="corp-input uppercase font-mono" placeholder="GSTIN *" maxlength="15" required>
+                    <input type="tel" id="gstMobile" class="corp-input" placeholder="Mobile Number *" maxlength="10" required>
+                    <input type="email" id="gstEmail" class="corp-input bg-gray-50" readonly placeholder="Email *">
+                </div>
+                <!-- Step 2 -->
+                <div id="step-gst-2" class="space-y-4 hidden">
+                    <select id="gstType" class="corp-select" required>
+                        <option value="" disabled selected>Return Type *</option>
+                        <option value="Regular">Regular</option>
+                        <option value="Composition">Composition</option>
+                        <option value="Annual">Annual</option>
+                    </select>
+                    <select id="gstPeriod" class="corp-select" required>
+                        <option value="" disabled selected>Return Period *</option>
+                        <option value="Apr-2026">Apr 2026</option>
+                        <option value="May-2026">May 2026</option>
+                        <option value="Jun-2026">Jun 2026</option>
+                        <option value="Jul-2026">Jul 2026</option>
+                        <option value="Q1-2026">Q1 (Apr-Jun 2026)</option>
+                        <option value="Q2-2026">Q2 (Jul-Sep 2026)</option>
+                    </select>
+                </div>
+                <!-- Step 3 -->
+                <div id="step-gst-3" class="hidden">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="file-upload-wrapper"><span class="text-xs font-bold block text-brand-slate mb-1">Sales Stmt</span><input type="file" id="gstSales" required></div>
+                        <div class="file-upload-wrapper"><span class="text-xs font-bold block text-brand-slate mb-1">Purchase Stmt</span><input type="file" id="gstPur"></div>
+                        <div class="file-upload-wrapper"><span class="text-xs font-bold block text-brand-slate mb-1">Bank Stmt</span><input type="file" id="gstBank"></div>
+                        <div class="file-upload-wrapper"><span class="text-xs font-bold block text-brand-slate mb-1">Others</span><input type="file" id="gstOthers"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="fixed bottom-0 w-full p-4 bg-white border-t border-gray-100 flex gap-3 z-20">
+            <button id="btn-gst-back" onclick="navStep('gst', -1)" class="w-1/3 bg-gray-50 text-brand-slate font-bold py-4 rounded-2xl hidden">Back</button>
+            <button id="btn-gst-next" onclick="navStep('gst', 1)" class="flex-1 bg-brand-slate text-white font-bold py-4 rounded-2xl shadow-md">Next Step</button>
+            <button id="btn-gst-submit" onclick="submitCompliance('GST')" class="flex-1 bg-brand-slate text-white font-bold py-4 rounded-2xl shadow-md hidden">Submit</button>
+        </div>
+    </div>
+
+    <!-- PAYMENTS MODAL -->
+    <div id="modal-payment" class="full-modal">
+        <div class="px-5 h-[64px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 shrink-0">
+            <h3 class="font-bold text-lg text-brand-slate">Secure Payment</h3>
+            <button onclick="closeModal('modal-payment')"><i data-lucide="x" class="w-6 h-6 text-gray-500"></i></button>
+        </div>
+        <div class="flex-grow p-5 space-y-5 bg-white">
+            <div class="flex gap-2">
+                <input type="text" id="payAppNo" class="corp-input uppercase font-mono text-sm flex-grow" placeholder="Task / Compliance No">
+                <button onclick="verifyPayment()" class="bg-brand-slate text-white font-bold px-5 rounded-xl text-sm">Verify</button>
+            </div>
+            
+            <div id="payDetailsBlock" class="hidden space-y-4">
+                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                    <p class="text-xs text-gray-500 uppercase font-bold mb-1">Client Name</p>
+                    <p id="payDispName" class="font-bold text-lg mb-3 text-brand-slate">Name</p>
+                    <p class="text-xs text-gray-500 uppercase font-bold mb-1">Amount Due</p>
+                    <p id="payDispAmount" class="font-black text-2xl text-brand-red">₹ 0.00</p>
+                </div>
+                
+                <div id="qrBlock" class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center hidden">
+                    <img id="payQrCode" src="" class="w-48 h-48 mb-4 border p-2 rounded-xl">
+                    <p class="text-xs font-bold text-gray-500 mb-4">Scan using any UPI App</p>
+                    <div class="file-upload-wrapper w-full"><span class="text-sm font-bold block text-brand-slate"><i data-lucide="upload" class="inline w-4 h-4 mr-1"></i> Upload Receipt</span><input type="file" id="payProof"></div>
+                    <button id="paySubmitBtn" onclick="submitPayment()" class="w-full bg-brand-slate text-white font-bold py-4 rounded-xl mt-4 shadow-md">Confirm Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MY FILINGS MODAL -->
+    <div id="modal-clients" class="full-modal">
+        <div class="px-5 h-[64px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 shrink-0">
+            <h3 class="font-bold text-lg text-brand-slate">My Filings</h3>
+            <button onclick="closeModal('modal-clients')"><i data-lucide="x" class="w-6 h-6 text-gray-500"></i></button>
+        </div>
+        <div class="flex-grow p-5 bg-white">
+            <div id="myFilingsList" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- TAX UPDATES MODAL -->
+    <div id="modal-taxupdates" class="full-modal">
+        <div class="px-5 h-[64px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 shrink-0">
+            <h3 class="font-bold text-lg text-brand-slate">Tax Updates</h3>
+            <button onclick="closeModal('modal-taxupdates')"><i data-lucide="x" class="w-6 h-6 text-gray-500"></i></button>
+        </div>
+        <div class="flex-grow p-5 bg-white">
+            <div id="taxUpdatesList" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- CALENDAR MODAL -->
+    <div id="modal-calendar" class="full-modal">
+        <div class="px-5 h-[64px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 shrink-0">
+            <h3 class="font-bold text-lg text-brand-slate">Compliance Calendar</h3>
+            <button onclick="closeModal('modal-calendar')"><i data-lucide="x" class="w-6 h-6 text-gray-500"></i></button>
+        </div>
+        <div class="flex-grow p-5 bg-white">
+            <div id="calendarList" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        lucide.createIcons();
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxY5VHAOIBC2rDv305WJJm-iuKfi9bjxvV-rRhR9E9mJcPeBgMBX6aYw-nbrWcGeQ6C0A/exec';
+        let userState = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const splash = document.getElementById('splash');
+            if (splash) setTimeout(() => { splash.style.opacity = '0'; setTimeout(() => splash.remove(), 500); }, 1500);
+            
+            const saved = localStorage.getItem('taxHubUser');
+            if (saved) { userState = JSON.parse(saved); initDashboard(); }
+            else { navigateTo('login'); }
+        });
+
+        // --- AUTHENTICATION ---
+        const GOOGLE_CLIENT_ID = "753272952222-c1pgj8cb8g7vte82sp6kevd3mku17cca.apps.googleusercontent.com"; 
+        window.onload = function () {
+            if(typeof google !== 'undefined') {
+                google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleAuth });
+                google.accounts.id.renderButton(document.getElementById("googleAuthContainer"), { theme: "outline", size: "large", width: 280 });
+            }
+        };
+
+        function handleAuth(response) {
+            const data = JSON.parse(decodeURIComponent(window.atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            showToast("Verifying identity...");
+            
+            // Note: Since Apps Script doPost runs cross-origin, we simulate verification using a GET request proxy inside doGet.
+            fetch(`${SCRIPT_URL}?action=VERIFY_LOGIN_GET&email=${encodeURIComponent(data.email)}&name=${encodeURIComponent(data.name)}`)
+            .then(res => res.json())
+            .then(resData => {
+                if(resData.status === "success") {
+                    userState = { clientId: resData.clientId, name: resData.name, email: resData.email, picture: data.picture, mobile: resData.mobile, pan: resData.pan, gstin: resData.gstin };
+                    localStorage.setItem('taxHubUser', JSON.stringify(userState));
+                    initDashboard();
+                    showToast(resData.clientId === "NEW" ? "Welcome! Account pending review." : "Logged In Successfully");
+                } else {
+                    showToast("Login failed.", true);
+                }
+            }).catch(() => showToast("Connection error. Please try again.", true));
+        }
+
+        function logout() { localStorage.removeItem('taxHubUser'); userState = null; closeMenu(); navigateTo('login'); }
+
+        // --- ROUTING & UI ---
+        function navigateTo(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            
+            const isLogin = viewId === 'login';
+            document.getElementById('app-header').style.display = isLogin ? 'none' : 'flex';
+            document.getElementById('app-mobnav').style.display = isLogin ? 'none' : 'flex';
+        }
+
+        function openModal(id) { 
+            document.getElementById(id).classList.add('active'); 
+            if(id === 'modal-clients') fetchMyFilings();
+            if(id === 'modal-taxupdates') fetchTaxUpdates();
+            if(id === 'modal-calendar') fetchCalendar(false);
+        }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function openMenu() { document.getElementById('sideMenu').classList.remove('hidden'); setTimeout(()=>document.getElementById('sideMenuContent').classList.remove('translate-x-full'), 10); }
+        function closeMenu() { document.getElementById('sideMenuContent').classList.add('translate-x-full'); setTimeout(()=>document.getElementById('sideMenu').classList.add('hidden'), 300); }
+        function showToast(msg, err=false) {
+            const t = document.getElementById('toast'); t.className = `toast show ${err?'error':'success'}`;
+            t.innerHTML = msg; setTimeout(()=>t.classList.remove('show'), 3000);
+        }
+
+        // --- INIT DASHBOARD ---
+        function initDashboard() {
+            navigateTo('dashboard');
+            document.getElementById('welcomeName').innerText = userState.name;
+            document.getElementById('menuName').innerText = userState.name;
+            document.getElementById('menuId').innerText = userState.clientId;
+            if(userState.picture) document.getElementById('headerAvatarImg').src = userState.picture;
+
+            // Forms Auto-fill
+            document.getElementById('itrName').value = userState.name;
+            if(userState.pan) document.getElementById('itrPan').value = userState.pan;
+            if(userState.mobile) document.getElementById('itrMobile').value = userState.mobile;
+            document.getElementById('itrEmail').value = userState.email;
+            
+            document.getElementById('gstName').value = userState.name;
+            if(userState.gstin) document.getElementById('gstinNo').value = userState.gstin;
+            if(userState.mobile) document.getElementById('gstMobile').value = userState.mobile;
+            document.getElementById('gstEmail').value = userState.email;
+
+            fetchDashboardData();
+        }
+
+        function fetchDashboardData() {
+            fetch(`${SCRIPT_URL}?action=GET_DASHBOARD&clientId=${encodeURIComponent(userState.clientId)}&email=${encodeURIComponent(userState.email)}`).then(r=>r.json()).then(data => {
+                const grid = document.getElementById('dashStatusGrid');
+                if(!data.filings || data.filings.length === 0) {
+                    grid.innerHTML = `<div class="p-5 text-center text-sm text-gray-400 bg-gray-50 rounded-2xl border border-gray-100">No recent filings found.</div>`;
+                } else {
+                    grid.innerHTML = data.filings.slice(0, 3).map(f => buildStatusCard(f)).join('');
+                }
+            }).catch(()=> showToast("Error loading dashboard", true));
+            fetchCalendar(true);
+        }
+
+        function buildStatusCard(item) {
+            const isDue = item.Amount > 0;
+            const needsDoc = item.Status === "Pending Documents" || item.Status === "DocNotReceived";
+            
+            let btnHtml = '';
+            if (isDue) btnHtml += `<button onclick="triggerPayment('${item.AppNo}')" class="mt-3 w-full bg-brand-red text-white text-xs font-bold py-2.5 rounded-xl shadow-sm">Pay Due (₹${item.Amount})</button>`;
+            if (needsDoc) btnHtml += `<button onclick="openModal('modal-${item.Type.toLowerCase()}')" class="mt-3 w-full bg-brand-yellow text-brand-slate text-xs font-bold py-2.5 rounded-xl shadow-sm">Upload Pending Docs</button>`;
+
+            return `
+            <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="font-bold text-sm text-brand-slate leading-tight">${item.Type} - ${item.Period}</h4>
+                        <p class="text-[10px] font-mono text-gray-500 mt-1">${item.AppNo}</p>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-full ${item.Status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">${item.Status}</span>
+                </div>
+                ${btnHtml}
+            </div>`;
+        }
+
+        function triggerPayment(appNo) {
+            openModal('modal-payment');
+            document.getElementById('payAppNo').value = appNo;
+            verifyPayment();
+        }
+
+        // --- WIZARDS (ITR & GST) ---
+        let currentSteps = { itr: 1, gst: 1 };
+        
+        function validateStep(module, step) {
+            const stepDiv = document.getElementById(`step-${module}-${step}`);
+            const inputs = stepDiv.querySelectorAll('input[required], select[required]');
+            for(let input of inputs) {
+                if(!input.value.trim()) {
+                    showToast(`Please fill the required fields (*).`, true);
+                    input.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function navStep(module, dir) {
+            if (dir > 0 && !validateStep(module, currentSteps[module])) return;
+
+            document.getElementById(`step-${module}-${currentSteps[module]}`).classList.add('hidden');
+            document.getElementById(`nav-${module}-${currentSteps[module]}`).className = "w-1/3 text-center text-sm step-inactive pb-3";
+            currentSteps[module] += dir;
+            document.getElementById(`step-${module}-${currentSteps[module]}`).classList.remove('hidden');
+            document.getElementById(`nav-${module}-${currentSteps[module]}`).className = "w-1/3 text-center text-sm step-active pb-3";
+            
+            document.getElementById(`btn-${module}-back`).style.display = currentSteps[module] > 1 ? 'block' : 'none';
+            document.getElementById(`btn-${module}-next`).style.display = currentSteps[module] < 3 ? 'block' : 'none';
+            document.getElementById(`btn-${module}-submit`).style.display = currentSteps[module] === 3 ? 'block' : 'none';
+        }
+
+        async function getBase64(inputId) {
+            const file = document.getElementById(inputId).files[0];
+            if(!file) return "";
+            return new Promise((res, rej) => {
+                const reader = new FileReader();
+                reader.onload = () => res({ base64: reader.result.split(',')[1], mimeType: file.type, fileName: file.name });
+                reader.onerror = error => rej(error); reader.readAsDataURL(file);
+            });
+        }
+
+        async function submitCompliance(type) {
+            if (!validateStep(type.toLowerCase(), 3)) return; // Check file uploads if required
+
+            const btn = document.getElementById(`btn-${type.toLowerCase()}-submit`);
+            btn.innerHTML = 'Submitting...'; btn.disabled = true;
+
+            try {
+                let payload = { action: "SUBMIT_COMPLIANCE", ComplianceName: type, ClientId: userState.clientId, ClientName: userState.name, Email: userState.email };
+                if (type === 'ITR') {
+                    payload.Mobile = document.getElementById('itrMobile').value;
+                    payload.PanNo = document.getElementById('itrPan').value;
+                    payload.ReturnType = document.getElementById('itrType').value;
+                    payload.Period = document.getElementById('itrAy').value;
+                    payload.BankFile = await getBase64('itrBank');
+                    payload.Form16File = await getBase64('itrForm16');
+                    payload.PnLFile = await getBase64('itrPnl');
+                    payload.OthersFile = await getBase64('itrOthers');
+                } else {
+                    payload.Mobile = document.getElementById('gstMobile').value;
+                    payload.GstNo = document.getElementById('gstinNo').value;
+                    payload.ReturnType = document.getElementById('gstType').value;
+                    payload.Period = document.getElementById('gstPeriod').value;
+                    payload.SalesFile = await getBase64('gstSales');
+                    payload.PurchaseFile = await getBase64('gstPur');
+                    payload.BankFile = await getBase64('gstBank');
+                    payload.OthersFile = await getBase64('gstOthers');
+                }
+
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
+                .then(() => {
+                    showToast("Application Submitted Successfully!");
+                    closeModal(`modal-${type.toLowerCase()}`);
+                    document.getElementById(`form-${type.toLowerCase()}`).reset();
+                    navStep(type.toLowerCase(), -2); // reset to step 1
+                    fetchDashboardData();
+                });
+            } catch(e) { showToast("Upload error", true); }
+            
+            setTimeout(() => { btn.innerHTML = `Submit`; btn.disabled = false; }, 2000);
+        }
+
+        // --- PAYMENT LOGIC ---
+        function verifyPayment() {
+            const appNo = document.getElementById('payAppNo').value;
+            if(!appNo) return;
+            fetch(`${SCRIPT_URL}?action=VERIFY_PAYMENT&appNo=${encodeURIComponent(appNo)}`).then(r=>r.json()).then(data => {
+                if(data.found && data.amount > 0) {
+                    document.getElementById('payDetailsBlock').classList.remove('hidden');
+                    document.getElementById('payDispName').innerText = data.name;
+                    document.getElementById('payDispAmount').innerText = "₹ " + data.amount;
+                    document.getElementById('qrBlock').classList.remove('hidden');
+                    document.getElementById('payQrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=accountree@ybl&pn=Accountree&am=${data.amount}&tn=${appNo}`;
+                    document.getElementById('generateQrBtn').classList.add('hidden');
+                } else {
+                    showToast("No pending dues found.", true);
+                }
+            });
+        }
+
+        async function submitPayment() {
+            const appNo = document.getElementById('payAppNo').value;
+            const proof = await getBase64('payProof');
+            if(!proof) return showToast("Upload Receipt!", true);
+            
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({action: "SUBMIT_PAYMENT", AKN: appNo, PaymentProof: proof, Name: userState.name, Mobile: userState.mobile, ClientId: userState.clientId, Amount: document.getElementById('payDispAmount').innerText.replace('₹ ','')}), mode: 'no-cors' });
+            showToast("Payment Proof Submitted!");
+            closeModal('modal-payment');
+        }
+
+        // --- LIST FETCHERS ---
+        function fetchMyFilings() {
+            document.getElementById('myFilingsList').innerHTML = `<div class="text-center py-4"><i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto text-gray-400"></i></div>`;
+            lucide.createIcons();
+            fetch(`${SCRIPT_URL}?action=GET_DASHBOARD&clientId=${encodeURIComponent(userState.clientId)}&email=${encodeURIComponent(userState.email)}`).then(r=>r.json()).then(data => {
+                if(!data.filings || data.filings.length === 0) { document.getElementById('myFilingsList').innerHTML = `<p class="text-gray-400 text-sm text-center">No filings found</p>`; return; }
+                document.getElementById('myFilingsList').innerHTML = data.filings.map(f => `<div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-3"><div class="flex justify-between"><div><h4 class="font-bold text-brand-slate text-sm">${f.Type} - ${f.Period}</h4><p class="text-[10px] font-mono text-gray-500">${f.AppNo}</p></div><div class="text-right"><p class="text-xs font-bold text-gray-700">${f.Status}</p><p class="text-[10px] text-brand-red font-bold mt-1">${f.Amount>0 ? 'Due: ₹'+f.Amount : ''}</p></div></div></div>`).join('');
+            });
+        }
+
+        function fetchTaxUpdates() {
+            fetch(`${SCRIPT_URL}?action=GET_UPDATES`).then(r=>r.json()).then(data => {
+                document.getElementById('taxUpdatesList').innerHTML = data.map(d => `<div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 mb-3"><h4 class="font-bold text-brand-slate text-sm">${d.UpdateName}</h4><p class="text-xs text-gray-600 mt-2 leading-relaxed">${d.UpdateDescription}</p></div>`).join('');
+            });
+        }
+
+        function fetchCalendar(dashOnly = false) {
+            fetch(`${SCRIPT_URL}?action=GET_CALENDAR`).then(r=>r.json()).then(data => {
+                let validDates = data.filter(d => new Date(d.Date) >= new Date()).sort((a,b) => new Date(a.Date) - new Date(b.Date));
+                let html = validDates.map(d => {
+                    const days = Math.ceil((new Date(d.Date) - new Date()) / 86400000);
+                    const color = days < 30 ? '#DC2626' : '#F59E0B'; // Red if < 30 days, yellow otherwise
+                    
+                    if(dashOnly) {
+                        return `
+                        <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex flex-col justify-center gap-2">
+                            <div class="flex items-center gap-3">
+                                <div class="relative w-12 h-12 shrink-0">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                        <circle cx="18" cy="18" r="16" fill="none" stroke="#f1f5f9" stroke-width="3"></circle>
+                                        <circle cx="18" cy="18" r="16" fill="none" stroke="${color}" stroke-width="3" stroke-dasharray="100 100" stroke-dashoffset="${100 - (Math.min(days, 100)/100*100)}"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center font-bold text-xs text-brand-slate">${days}d</div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-brand-slate leading-tight">${d.Name}</h4>
+                                    <p class="text-[10px] text-gray-500 mt-0.5">${d.Period}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    return `<div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-3 flex justify-between items-center"><div><h4 class="font-bold text-sm text-brand-slate">${d.Name}</h4><p class="text-[10px] text-gray-500 mt-1">${d.Period}</p></div><span class="text-brand-red font-bold text-xs">${new Date(d.Date).toLocaleDateString()}</span></div>`;
+                }).join('');
+                
+                if(dashOnly) document.getElementById('dashCalendarGrid').innerHTML = html.length > 0 ? validDates.slice(0,2).map(d => {
+                    const days = Math.ceil((new Date(d.Date) - new Date()) / 86400000);
+                    const color = days < 30 ? '#DC2626' : '#F59E0B'; 
+                    return `<div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex flex-col justify-center gap-2"><div class="flex items-center gap-3"><div class="relative w-12 h-12 shrink-0"><svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="#f1f5f9" stroke-width="3"></circle><circle cx="18" cy="18" r="16" fill="none" stroke="${color}" stroke-width="3" stroke-dasharray="100 100" stroke-dashoffset="${100 - (Math.min(days, 100)/100*100)}"></circle></svg><div class="absolute inset-0 flex items-center justify-center font-bold text-xs text-brand-slate">${days}d</div></div><div><h4 class="text-sm font-bold text-brand-slate leading-tight">${d.Name}</h4><p class="text-[10px] text-gray-500 mt-0.5">${d.Period}</p></div></div></div>`;
+                }).join('') : '<p class="text-xs text-gray-400">No upcoming dates.</p>';
+                else document.getElementById('calendarList').innerHTML = html;
+            });
+        }
+    </script>
+</body>
+</html>
