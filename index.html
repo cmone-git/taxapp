@@ -3,23 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CM TaxApp | Corporate Dashboard</title>
+    <title>CM TaxApp</title>
     
-    <!-- Favicon & App Icons (1x1) -->
-    <link rel="icon" type="image/png" href="assets/logo.png">
-    <link rel="apple-touch-icon" href="assets/logo.png">
+    <link rel="icon" type="image/png" href="assets/logo-fav.png">
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
     
-    <meta name="theme-color" content="#FFFFFF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Google Identity Services for Login -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <script>
@@ -28,13 +20,7 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            primary: '#111827', 
-                            dark: '#0B1120',    
-                            text: '#334155',    
-                            heading: '#0F172A', 
-                            bg: '#F8FAFC'      
-                        }
+                        brand: { yellow: '#F59E0B', red: '#DC2626', slate: '#1e2235', bg: '#ffffff' }
                     }
                 }
             }
@@ -46,1177 +32,624 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         .corp-input, .corp-select {
-            width: 100%; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px;
-            font-size: 16px; color: #0F172A; background: #FFFFFF; transition: all 0.2s ease; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            width: 100%; border: 1px solid #f1f5f9; border-radius: 12px; padding: 14px 18px;
+            font-size: 14px; color: #0F172A; background: #f8fafc; transition: all 0.2s ease; outline: none;
         }
-        .corp-input:focus, .corp-select:focus { 
-            border-color: #111827; box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
-        }
-        .corp-input[readonly] { background: #F1F5F9; color: #64748B; cursor: not-allowed; }
+        .corp-input:focus, .corp-select:focus { border-color: #1e2235; background: #ffffff; }
+        .corp-input[readonly] { background: #f1f5f9; color: #64748B; cursor: not-allowed; }
         
-        .file-upload-wrapper {
-            position: relative; border: 1px dashed #CBD5E1; border-radius: 10px; padding: 22px; text-align: center; background: #FFFFFF; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-        }
-        .file-upload-wrapper:hover { border-color: #111827; background: #F8FAFC; }
-        .file-upload-wrapper input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .file-upload-wrapper { position: relative; border: 1px dashed #CBD5E1; border-radius: 12px; padding: 15px; text-align: center; background: #f8fafc; cursor: pointer; transition: all 0.2s; }
+        .file-upload-wrapper:hover { border-color: #F59E0B; background: #FFFBEB; }
+        .file-upload-wrapper input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 
-        .step-active { color: #111827; font-weight: 700; border-bottom: 2px solid #111827; }
+        .step-active { color: #DC2626; font-weight: 700; border-bottom: 2px solid #DC2626; }
         .step-inactive { color: #94A3B8; font-weight: 500; border-bottom: 2px solid transparent; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideRight { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 15px; opacity: 0; visibility: hidden; transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 999999; display: flex; align-items: center; gap: 10px; white-space: nowrap; box-shadow: 0 6px 24px rgba(0,0,0,0.15); color: #FFFFFF; border: none; }
-        .toast.success { background: #10B981; }
-        .toast.error { background: #EF4444; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 13px; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 999999; display: flex; align-items: center; gap: 10px; color: #FFF; border: none; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .toast.success { background: #1e2235; }
+        .toast.error { background: #DC2626; }
         .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        
+        /* Modals sit perfectly between the fixed header and fixed bottom nav */
+        .full-modal { position: fixed; top: 64px; bottom: 70px; left: 0; right: 0; background: #ffffff; z-index: 50; overflow-y: auto; display: none; flex-direction: column; }
+        .full-modal.active { display: flex; animation: fadeIn 0.2s ease-out; }
     </style>
 </head>
-<body class="font-sans text-brand-text min-h-screen flex flex-col relative overflow-x-hidden">
+<body class="text-brand-slate min-h-screen flex flex-col relative overflow-x-hidden">
 
-    <!-- Splash Screen -->
-    <div id="splash" class="fixed inset-0 z-[200] bg-[#f8fafc] flex flex-col items-center justify-center transition-opacity duration-500">
-        <img src="assets/name.png" alt="CM TaxApp" class="w-64 h-auto animate-pulse object-contain">
+    <!-- Global Processing Loader -->
+    <div id="globalLoader" class="fixed inset-0 z-[999] bg-white/80 backdrop-blur-sm hidden flex-col items-center justify-center">
+        <div class="flex space-x-2 mb-4">
+            <div class="w-4 h-4 bg-brand-red rounded-full animate-bounce" style="animation-delay: -0.3s"></div>
+            <div class="w-4 h-4 bg-brand-yellow rounded-full animate-bounce" style="animation-delay: -0.15s"></div>
+            <div class="w-4 h-4 bg-brand-slate rounded-full animate-bounce"></div>
+        </div>
+        <p class="text-brand-slate font-bold text-sm tracking-wide">Please Wait...</p>
     </div>
 
-    <!-- Fixed Sticky Header -->
-    <header class="fixed top-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 h-[64px] px-5 flex justify-between items-center">
-        <div class="flex items-center">
-            <img src="assets/name.png" alt="CM TaxApp" class="h-9 object-contain cursor-pointer" onclick="goHome()">
+    <!-- Splash Screen -->
+    <div id="splash" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center transition-opacity duration-500">
+        <img src="assets/logo-splash.png" alt="Splash" class="w-32 h-32 object-contain animate-pulse">
+    </div>
+
+    <!-- Header (Permanent) -->
+    <header id="app-header" class="fixed top-0 left-0 w-full z-[80] bg-white shadow-sm border-b border-gray-100 h-[64px] px-5 flex justify-between items-center hidden">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="closeAllModals()">
+            <img src="assets/logo.png" alt="CM" class="w-8 h-8 rounded-lg object-contain">
+            <img src="assets/header-name.png" alt="Tax Hub" class="h-5 object-contain">
         </div>
         <div class="flex items-center gap-3">
-            <button onclick="openSearch()" class="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 shadow-sm hover:bg-gray-100 transition">
-                <i data-lucide="search" class="w-5 h-5"></i>
+            <button onclick="openModal('modal-taxupdates')" class="relative w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition">
+                <i data-lucide="bell" class="w-4 h-4"></i>
+                <span class="absolute top-2 right-2 w-2 h-2 bg-brand-red rounded-full"></span>
             </button>
-            <button onclick="window.location.href='taxupdates.html'" class="relative w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 shadow-sm hover:bg-gray-100 transition">
-                <i data-lucide="bell" class="w-5 h-5"></i>
-                <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-[#c80000] rounded-full animate-pulse border border-white"></span>
-            </button>
-            <button id="headerAvatarBtn" onclick="handleProfileClick()" class="w-10 h-10 rounded-full border border-gray-200 shadow-sm bg-white overflow-hidden flex items-center justify-center hover:bg-gray-50 transition">
-                <i data-lucide="user" class="w-5 h-5 text-gray-500" id="headerAvatarIcon"></i>
-                <img id="headerAvatarImg" src="" class="w-full h-full object-cover hidden" alt="Profile">
+            <button class="w-9 h-9 rounded-full border border-gray-200 bg-gray-100 overflow-hidden flex items-center justify-center shadow-sm">
+                <img id="headerAvatarImg" src="assets/logo-app.png" class="w-full h-full object-cover" alt="Profile">
             </button>
         </div>
     </header>
 
-    <!-- MAIN APP WRAPPER -->
-    <div id="mainApp" class="flex flex-col flex-grow h-screen overflow-y-auto bg-[#F8FAFC]">
-        <main class="px-5 w-full max-w-[600px] mx-auto space-y-7 pt-[84px] pb-[90px]">
+    <!-- Main Router View -->
+    <main id="app-main" class="flex-grow pt-[64px] pb-[80px] relative bg-white">
+        
+        <!-- LOGIN VIEW -->
+        <div id="view-login" class="view-section min-h-screen flex flex-col bg-brand-slate justify-center px-5 -mt-[64px] z-[90] relative">
+            <div class="bg-white rounded-[32px] w-full max-w-[420px] p-8 shadow-2xl relative flex flex-col items-center mx-auto text-center">
+                <img src="assets/logo-app.png" alt="CM" class="w-20 h-20 mb-6 object-contain">
+                <h1 class="text-2xl font-black text-brand-slate tracking-tight mb-2">Welcome Back!</h1>
+                <p class="text-gray-500 text-sm mb-8 leading-relaxed font-medium">Sign in to Continue</p>
+                <div id="googleAuthContainer" class="w-full flex justify-center mb-4 min-h-[44px]"></div>
+                <p class="text-xs text-gray-400 text-center mt-4 px-4">Secure access authenticated via Google. By continuing, you agree to our Privacy Policy.</p>
+            </div>
+        </div>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="view-dashboard" class="view-section hidden px-5 w-full max-w-[600px] mx-auto space-y-7 pt-5">
             
-            <!-- Welcome Section -->
+            <!-- Welcome -->
             <div>
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="text-3xl leading-none">👋</span>
-                    <h1 id="welcomeHeading" class="text-[32px] font-black text-gray-900 tracking-tight leading-none truncate">Welcome Back</h1>
-                </div>
-                <p class="text-sm text-gray-500 font-semibold pl-1.5">File your Taxes with Confidence.</p>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Welcome Back</p>
+                <h1 id="welcomeName" class="text-xl font-black text-brand-slate tracking-tight leading-tight truncate">Name</h1>
             </div>
 
-            <!-- Recent Status Dashboard Widget (Dynamically Loaded) -->
-            <div id="dashboardStatusContainer" class="hidden">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 px-1">Recent Status</h3>
-                <div id="dashboardStatusContent"></div>
-            </div>
-
-            <!-- Due Date Reminder Card -->
-            <div class="bg-gray-900 rounded-[28px] p-6 shadow-lg relative overflow-hidden text-white">
-                <i data-lucide="calculator" class="absolute -right-4 -bottom-4 w-32 h-32 text-white opacity-[0.03]"></i>
-                <div class="flex justify-between items-center relative z-10 mb-6">
-                    <div>
-                        <h2 class="font-bold text-lg mb-1.5 flex items-center gap-2 text-white tracking-wide">
-                            ITR Due Date
-                            <span class="w-1.5 h-1.5 rounded-full bg-white inline-block shadow-[0_0_8px_rgba(255,255,255,0.8)]"></span>
-                        </h2>
-                        <p class="text-[13px] text-gray-400 mb-4 font-medium">Assessment Year 2026-27</p>
-                        
-                        <div class="inline-block border border-gray-700 bg-gray-800/50 px-3 py-1.5 rounded-lg">
-                            <span class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase">Deadline</span>
-                            <span class="block text-sm font-bold text-white mt-0.5">31 August 2026</span>
-                        </div>
-                    </div>
-                    <!-- Circular Graph -->
-                    <div class="relative w-24 h-24 flex items-center justify-center bg-white rounded-full shadow-inner border-[4px] border-gray-800">
-                        <svg class="w-full h-full transform -rotate-90 absolute" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" stroke-width="10"></circle>
-                            <circle id="donutProgress" cx="50" cy="50" r="42" fill="none" stroke="#c80000" stroke-width="10" stroke-dasharray="263.89" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-1000 ease-out"></circle>
-                        </svg>
-                        <div class="absolute flex flex-col items-center justify-center mt-1">
-                            <span id="donutDaysLeft" class="text-3xl font-black leading-none text-gray-900 tracking-tight">--</span>
-                            <span class="text-[9px] font-bold text-gray-500 mt-0.5 tracking-widest uppercase">Days</span>
-                        </div>
-                    </div>
-                </div>
-
-                <button onclick="openItrModal()" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-bold py-3.5 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-2">
-                    <i data-lucide="send" class="w-4 h-4"></i> File ITR Now
-                </button>
-            </div>
-
-            <!-- Quick Tools Grid -->
+            <!-- Next Compliance Calendar Grid (1 Row, Horizontal Scroll) -->
             <div>
-                <h3 class="text-xl font-bold text-gray-900 mb-5 px-1">Quick Tools</h3>
-                <div class="grid grid-cols-2 gap-4 gap-y-7 pt-1">
-                    
-                    <div class="relative cursor-pointer group" onclick="openItrModal()">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-slate-200 rounded-t-lg rounded-b-sm z-10 shadow-sm transition-transform group-hover:-translate-y-0.5"></div>
-                        <div class="bg-white rounded-2xl p-5 pt-6 shadow-[0_8px_20px_rgba(0,0,0,0.06)] border border-gray-100 relative z-0 group-hover:shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition-shadow h-full flex flex-col">
-                            <div class="flex justify-between items-start mb-3">
-                                <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider w-2/3 leading-tight">Income Tax Return</h4>
-                                <i data-lucide="file-text" class="w-6 h-6 text-slate-400"></i>
-                            </div>
-                            <p class="text-[13px] text-slate-500 font-medium leading-relaxed mt-2 flex-grow">Submit your tax returns securely.</p>
-                        </div>
-                    </div>
+                <div class="flex justify-between items-end mb-3 px-1">
+                    <h3 class="text-base font-bold text-brand-slate">Next Compliance</h3>
+                    <button onclick="openModal('modal-calendar')" class="text-xs font-bold text-brand-yellow hover:text-yellow-600">View Calendar</button>
+                </div>
+                <div class="flex overflow-x-auto gap-3 snap-x no-scrollbar pb-2" id="dashCalendarGrid">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
 
-                    <div class="relative cursor-pointer group" onclick="openUploadModal()">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-blue-200 rounded-t-lg rounded-b-sm z-10 shadow-sm transition-transform group-hover:-translate-y-0.5"></div>
-                        <div class="bg-white rounded-2xl p-5 pt-6 shadow-[0_8px_20px_rgba(0,0,0,0.06)] border border-gray-100 relative z-0 group-hover:shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition-shadow h-full flex flex-col">
-                            <div class="flex justify-between items-start mb-3">
-                                <h4 class="text-sm font-bold text-blue-700 uppercase tracking-wider">Upload</h4>
-                                <i data-lucide="cloud-upload" class="w-6 h-6 text-blue-400"></i>
-                            </div>
-                            <p class="text-[13px] text-slate-500 font-medium leading-relaxed mt-2 flex-grow">Submit your pending document files.</p>
-                        </div>
+            <!-- Quick Tools (1 Row, Horizontal Scroll) -->
+            <div>
+                <h3 class="text-base font-bold text-brand-slate mb-3 px-1">Quick Tools</h3>
+                <div class="flex overflow-x-auto gap-3 snap-x no-scrollbar pb-2">
+                    <div class="bg-blue-50/50 rounded-[16px] p-4 border border-blue-100/50 cursor-pointer hover:shadow-sm transition shrink-0 min-w-[100px] flex flex-col items-center text-center" onclick="openModal('modal-itr')">
+                        <i data-lucide="file-text" class="w-5 h-5 text-blue-600 mb-2"></i>
+                        <h4 class="text-xs font-bold text-brand-slate">Income Tax</h4>
                     </div>
-
-                    <div class="relative cursor-pointer group" onclick="openPaymentModal()">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-indigo-200 rounded-t-lg rounded-b-sm z-10 shadow-sm transition-transform group-hover:-translate-y-0.5"></div>
-                        <div class="bg-white rounded-2xl p-5 pt-6 shadow-[0_8px_20px_rgba(0,0,0,0.06)] border border-gray-100 relative z-0 group-hover:shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition-shadow h-full flex flex-col">
-                            <div class="flex justify-between items-start mb-3">
-                                <h4 class="text-sm font-bold text-indigo-700 uppercase tracking-wider">Payment</h4>
-                                <i data-lucide="credit-card" class="w-6 h-6 text-indigo-400"></i>
-                            </div>
-                            <p class="text-[13px] text-slate-500 font-medium leading-relaxed mt-2 flex-grow">Make your secure online payments.</p>
-                        </div>
+                    <div class="bg-green-50/50 rounded-[16px] p-4 border border-green-100/50 cursor-pointer hover:shadow-sm transition shrink-0 min-w-[100px] flex flex-col items-center text-center" onclick="openModal('modal-gst')">
+                        <i data-lucide="file-check-2" class="w-5 h-5 text-green-600 mb-2"></i>
+                        <h4 class="text-xs font-bold text-brand-slate">GST Filing</h4>
                     </div>
-
-                    <div class="relative cursor-pointer group" onclick="handleProfileClick()">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-teal-200 rounded-t-lg rounded-b-sm z-10 shadow-sm transition-transform group-hover:-translate-y-0.5"></div>
-                        <div class="bg-white rounded-2xl p-5 pt-6 shadow-[0_8px_20px_rgba(0,0,0,0.06)] border border-gray-100 relative z-0 group-hover:shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition-shadow h-full flex flex-col">
-                            <div class="flex justify-between items-start mb-3">
-                                <h4 class="text-sm font-bold text-teal-700 uppercase tracking-wider w-2/3 leading-tight">My Filings</h4>
-                                <i data-lucide="folder-check" class="w-6 h-6 text-teal-400"></i>
-                            </div>
-                            <p class="text-[13px] text-slate-500 font-medium leading-relaxed mt-2 flex-grow">View your status, AKN & receipts.</p>
-                        </div>
+                    <div class="bg-purple-50/50 rounded-[16px] p-4 border border-purple-100/50 cursor-pointer hover:shadow-sm transition shrink-0 min-w-[100px] flex flex-col items-center text-center" onclick="loadPaymentView()">
+                        <i data-lucide="calculator" class="w-5 h-5 text-purple-600 mb-2"></i>
+                        <h4 class="text-xs font-bold text-brand-slate">TDS & TCS</h4>
+                    </div>
+                    <div class="bg-yellow-50/50 rounded-[16px] p-4 border border-yellow-100/50 cursor-pointer hover:shadow-sm transition shrink-0 min-w-[100px] flex flex-col items-center text-center" onclick="openModal('modal-taxupdates')">
+                        <i data-lucide="briefcase" class="w-5 h-5 text-yellow-600 mb-2"></i>
+                        <h4 class="text-xs font-bold text-brand-slate">Others</h4>
                     </div>
                 </div>
             </div>
 
-            <!-- Corporate Support Banner -->
-            <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 flex items-center justify-between cursor-pointer shadow-lg hover:bg-black transition mt-6" onclick="window.location.href='tel:+919946151111'">
-                <div class="flex items-center gap-5">
-                    <div class="w-14 h-14 rounded-2xl bg-gray-800 flex items-center justify-center text-white border border-gray-700">
-                        <i data-lucide="headset" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-lg font-bold text-white">Dedicated Support</h4>
-                        <p class="text-sm text-gray-400 mt-1">Connect with Tax Experts</p>
-                    </div>
+            <!-- Recent Status / My Filings -->
+            <div>
+                <div class="flex justify-between items-end mb-3 px-1">
+                    <h3 class="text-base font-bold text-brand-slate">Recent Filings</h3>
+                    <button onclick="openModal('modal-clients')" class="text-xs font-bold text-brand-yellow hover:text-yellow-600">See All</button>
                 </div>
-                <i data-lucide="chevron-right" class="w-6 h-6 text-gray-500"></i>
+                <div id="dashStatusGrid" class="grid grid-cols-1 gap-3">
+                    <div class="text-center text-sm text-gray-400 py-4"><i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i></div>
+                </div>
             </div>
-        </main>
-    </div>
+            
+        </div>
 
-    <!-- Fixed Full-Length Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md border-t border-gray-200 px-6 h-[64px] flex justify-between items-center pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        <a href="#" onclick="goHome()" class="flex flex-col items-center gap-1.5 text-gray-900 w-16">
-            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
-            <span class="text-xs font-bold mt-0.5">Home</span>
-        </a>
-        <a href="#" onclick="openPaymentModal()" class="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-900 transition w-16">
-            <i data-lucide="indian-rupee" class="w-6 h-6"></i>
-            <span class="text-xs font-semibold mt-0.5">Payments</span>
-        </a>
-        <a href="#" onclick="handleProfileClick()" class="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-900 transition w-16">
-            <i data-lucide="user" class="w-6 h-6"></i>
-            <span class="text-xs font-semibold mt-0.5" id="navProfileText">Login</span>
-        </a>
-        <a href="#" onclick="openMenu()" class="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-900 transition w-16">
-            <i data-lucide="menu" class="w-6 h-6"></i>
-            <span class="text-xs font-semibold mt-0.5">Menu</span>
-        </a>
+    </main>
+
+    <!-- Bottom Navigation (Permanent) -->
+    <nav id="app-mobnav" class="fixed bottom-0 w-full bg-white border-t border-gray-100 px-6 h-[70px] flex justify-between items-center z-[80] hidden">
+        <a href="#" onclick="closeAllModals()" class="flex flex-col items-center text-brand-slate"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-1">Home</span></a>
+        <a href="#" onclick="loadPaymentView()" class="flex flex-col items-center text-gray-400 hover:text-brand-slate"><i data-lucide="indian-rupee" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-1">Pay</span></a>
+        <a href="#" onclick="openModal('modal-clients')" class="flex flex-col items-center text-gray-400 hover:text-brand-slate"><i data-lucide="folder-check" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-1">Filings</span></a>
+        <a href="#" onclick="openMenu()" class="flex flex-col items-center text-gray-400 hover:text-brand-slate"><i data-lucide="menu" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-1">Menu</span></a>
     </nav>
 
-    <!-- MY FILINGS / USER DASHBOARD MODAL -->
-    <div id="myFilingsModal" class="page-modal fixed top-[64px] bottom-[64px] left-0 w-full z-[50] hidden flex-col bg-[#F8FAFC]">
-        <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center bg-white shadow-sm">
-            <h3 class="font-bold text-lg text-gray-900">My Filings</h3>
-            <button onclick="goHome()" class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-full text-gray-500 hover:text-gray-900"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-        <div class="overflow-y-auto no-scrollbar p-5 flex-grow">
-            <div class="max-w-[600px] mx-auto space-y-4 pt-2" id="myFilingsContainer">
-                <!-- Dynamically Populated -->
-            </div>
-        </div>
-    </div>
-
-    <!-- SIDE NAVIGATION MENU -->
-    <div id="sideMenu" class="page-modal fixed top-[64px] bottom-[64px] left-0 w-full z-[50] hidden">
-        <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onclick="goHome()"></div>
-        <div class="absolute inset-y-0 left-0 w-[80%] max-w-sm bg-white shadow-2xl flex flex-col animate-[slideRight_0.2s_ease-out]">
-            <div class="px-6 py-8 border-b border-gray-100 bg-white flex justify-between items-start">
+    <!-- Slide-in Menu -->
+    <div id="sideMenu" class="fixed inset-0 z-[120] hidden">
+        <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="closeMenu()"></div>
+        <div class="absolute inset-y-0 right-0 w-[80%] max-w-sm bg-white shadow-2xl flex flex-col transition-transform transform translate-x-full duration-300" id="sideMenuContent">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-brand-slate text-white">
                 <div>
-                    <img id="navAvatar" src="assets/logo.png" class="w-16 h-16 rounded-2xl border border-gray-200 object-contain bg-white p-1 hidden mb-3" alt="Profile">
-                    <div id="navInitials" class="w-16 h-16 bg-gray-50 rounded-2xl border border-gray-200 flex items-center justify-center text-gray-900 mb-3 shadow-sm font-bold text-2xl">GU</div>
-                    <h2 id="navName" class="text-lg font-bold text-gray-900 leading-tight">Guest User</h2>
-                    <p id="navEmail" class="text-sm font-medium text-gray-500 mt-1">Please Sign In</p>
+                    <h2 id="menuName" class="font-bold text-base">Name</h2>
+                    <p id="menuId" class="text-[10px] text-gray-300 font-mono mt-0.5">CID</p>
                 </div>
-                <button onclick="goHome()" class="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 transition shadow-sm">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+                <button onclick="closeMenu()"><i data-lucide="x" class="w-5 h-5 text-white"></i></button>
             </div>
-            <div class="flex-grow overflow-y-auto p-5 space-y-2">
-                <a href="#" onclick="goHome()" class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl text-gray-900 font-bold transition text-base">
-                    <i data-lucide="layout-dashboard" class="w-6 h-6"></i> Dashboard
-                </a>
-                <a href="taxupdates.html" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl text-gray-700 font-semibold transition text-base">
-                    <i data-lucide="newspaper" class="w-6 h-6 text-gray-400"></i> Tax Updates
-                </a>
-                <a href="#" onclick="openItrModal();" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl text-gray-700 font-semibold transition text-base">
-                    <i data-lucide="file-text" class="w-6 h-6 text-gray-400"></i> File ITR Return
-                </a>
-                <a href="#" onclick="openPaymentModal();" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl text-gray-700 font-semibold transition text-base">
-                    <i data-lucide="indian-rupee" class="w-6 h-6 text-gray-400"></i> Payments
-                </a>
-                <div class="my-3 border-t border-gray-100"></div>
-                <a href="privacy.html" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl text-gray-700 font-semibold transition text-base">
-                    <i data-lucide="shield-check" class="w-6 h-6 text-gray-400"></i> Privacy and Policy
-                </a>
-                <a href="about.html" class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl text-gray-700 font-semibold transition text-base">
-                    <i data-lucide="info" class="w-6 h-6 text-gray-400"></i> About App
-                </a>
+            <div class="flex-grow p-4 space-y-1 overflow-y-auto">
+                <a href="#" onclick="closeMenu(); openModal('modal-itr')" class="flex items-center gap-3 p-3.5 hover:bg-gray-50 rounded-xl font-semibold text-sm text-brand-slate"><i data-lucide="file-text" class="w-4 h-4 text-gray-400"></i> Income Tax</a>
+                <a href="#" onclick="closeMenu(); openModal('modal-gst')" class="flex items-center gap-3 p-3.5 hover:bg-gray-50 rounded-xl font-semibold text-sm text-brand-slate"><i data-lucide="file-check-2" class="w-4 h-4 text-gray-400"></i> GST Filing</a>
+                <a href="#" onclick="closeMenu(); loadPaymentView()" class="flex items-center gap-3 p-3.5 hover:bg-gray-50 rounded-xl font-semibold text-sm text-brand-slate"><i data-lucide="indian-rupee" class="w-4 h-4 text-gray-400"></i> Pending Dues</a>
+                <a href="#" onclick="closeMenu(); openModal('modal-calendar')" class="flex items-center gap-3 p-3.5 hover:bg-gray-50 rounded-xl font-semibold text-sm text-brand-slate"><i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i> Calendar</a>
+                <div class="my-2 border-t border-gray-100"></div>
+                <a href="privacy.html" class="flex items-center gap-3 p-3.5 hover:bg-gray-50 rounded-xl font-semibold text-sm text-brand-slate"><i data-lucide="shield-check" class="w-4 h-4 text-gray-400"></i> Privacy & Policy</a>
+                <a href="app.html" class="flex items-center gap-3 p-3.5 hover:bg-gray-50 rounded-xl font-semibold text-sm text-brand-slate"><i data-lucide="info" class="w-4 h-4 text-gray-400"></i> About App</a>
             </div>
-            <div class="p-6 border-t border-gray-100 flex flex-col gap-3">
-                <button id="navSignInBtn" onclick="openLoginModal()" class="w-full flex items-center justify-center gap-2 text-white font-bold bg-gray-900 py-4 rounded-xl shadow-md transition text-base hover:bg-black">
-                    <i data-lucide="log-in" class="w-5 h-5"></i> Sign In
-                </button>
-                <button id="navSignOutBtn" onclick="handleLogout()" class="hidden w-full flex items-center justify-center gap-2 text-gray-900 font-bold border border-gray-200 bg-white py-4 rounded-xl hover:bg-gray-50 shadow-sm transition text-base">
-                    <i data-lucide="log-out" class="w-5 h-5"></i> Sign Out
-                </button>
+            <div class="p-4 border-t border-gray-100">
+                <p class="text-center text-[9px] font-bold text-gray-400 mb-3 uppercase tracking-wider">CM TAXAPP v1.0<br>By CM Filings.</p>
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-50 text-brand-red font-bold py-3 rounded-xl text-sm"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</button>
             </div>
         </div>
     </div>
 
-    <!-- ITR FORM MODAL -->
-    <div id="itrModal" class="page-modal fixed top-[64px] bottom-[64px] left-0 w-full z-[50] hidden flex-col bg-white">
-        <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center bg-white shadow-sm">
-            <h3 class="font-bold text-xl text-gray-900">File ITR</h3>
-            <button onclick="goHome()" class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-full text-gray-500 hover:text-gray-900">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
+    <!-- ============================================== -->
+    <!-- PERMANENT MODALS (Between Header & Nav) -->
+    <!-- ============================================== -->
 
-        <div id="itrModalNav" class="px-5 pt-5 bg-white flex justify-between text-center border-b border-gray-200 pb-0 shadow-sm">
-            <div id="navStep1" class="w-1/3 pb-4 step-active text-base transition-all duration-300">1. Personal</div>
-            <div id="navStep2" class="w-1/3 pb-4 step-inactive text-base transition-all duration-300">2. Income</div>
-            <div id="navStep3" class="w-1/3 pb-4 step-inactive text-base transition-all duration-300">3. Documents</div>
+    <!-- ITR MODAL -->
+    <div id="modal-itr" class="full-modal">
+        <div class="px-5 h-[56px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10 shrink-0">
+            <h3 class="font-bold text-base text-brand-slate">File Income Tax</h3>
+            <button onclick="closeModal('modal-itr')"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
         </div>
-
-        <div class="overflow-y-auto no-scrollbar p-5 flex-grow bg-[#F8FAFC]">
-            <form id="itrForm" class="h-full max-w-[600px] mx-auto block pt-2">
-                <!-- STEP 1 -->
-                <div id="step1" class="block animate-[fadeIn_0.3s_ease-out]">
-                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-5">
-                        <div class="mb-2 border-b border-gray-50 pb-4">
-                            <h4 class="text-lg font-bold text-gray-900">Personal Details</h4>
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-2 font-bold">Full Name <span class="text-red-600">*</span></label>
-                            <input type="text" id="s1_name" class="corp-input uppercase" required>
-                        </div>
-                        <div class="grid grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-2 font-bold">Mobile <span class="text-red-600">*</span></label>
-                                <input type="tel" id="s1_mobile" maxlength="10" class="corp-input" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-2 font-bold">PAN <span class="text-red-600">*</span></label>
-                                <input type="text" id="s1_pan" maxlength="10" class="corp-input uppercase font-mono" required>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-2 font-bold">Email <span class="text-red-600">*</span></label>
-                            <input type="email" id="s1_email" class="corp-input lowercase" required>
-                        </div>
-                    </div>
+        <div class="flex-grow overflow-y-auto p-5 pb-20 bg-white">
+            <form id="form-itr" class="max-w-[600px] mx-auto space-y-5">
+                <div class="flex justify-between border-b border-gray-200 pb-0 mb-4">
+                    <div id="nav-itr-1" class="w-1/3 text-center text-xs step-active pb-2">1. Personal</div>
+                    <div id="nav-itr-2" class="w-1/3 text-center text-xs step-inactive pb-2">2. Details</div>
+                    <div id="nav-itr-3" class="w-1/3 text-center text-xs step-inactive pb-2">3. Upload</div>
                 </div>
-                <!-- STEP 2 -->
-                <div id="step2" class="hidden animate-[fadeIn_0.3s_ease-out]">
-                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-5">
-                        <h4 class="text-lg font-bold text-gray-900 mb-2 border-b border-gray-50 pb-4">Income Details</h4>
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-2 font-bold">Financial Year <span class="text-red-600">*</span></label>
-                            <select id="s2_fy" class="corp-select" required>
-                                <option value="" disabled selected>Select FY</option>
-                                <option value="2025-26">2025-26</option>
-                                <option value="2024-25">2024-25</option>
-                                  <option value="2024-25">2023-24</option>
-                                  <option value="2024-25">2022-23</option>
-                                  <option value="2024-25">2022-23</option>
-                                  <option value="2024-25">2021-22</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-2 font-bold">Primary Source <span class="text-red-600">*</span></label>
-                            <select id="s2_head" class="corp-select" required>
-                                <option value="" disabled selected>Select Source</option>
-                                <option value="Salary">Salary</option>
-                                <option value="Business">Business / Profession</option>
-                                <option value="CapitalGains">Capital Gains</option>
-                                <option value="HouseProperty">House Property</option>
-                                <option value="Crypto">VDA</option>
-                                <option value="UsStocks">US Stocks</option>
-                                 <option value="Others">Others</option>
-                                
-                            </select>
-                        </div>
-                    </div>
+                <div id="step-itr-1" class="space-y-3">
+                    <input type="text" id="itrName" class="corp-input" readonly placeholder="Name *">
+                    <input type="text" id="itrPan" class="corp-input uppercase font-mono" placeholder="PAN *" maxlength="10" required>
+                    <input type="tel" id="itrMobile" class="corp-input" placeholder="Mobile Number *" maxlength="10" required>
+                    <input type="email" id="itrEmail" class="corp-input" readonly placeholder="Email *">
                 </div>
-                <!-- STEP 3 -->
-                <div id="step3" class="hidden animate-[fadeIn_0.3s_ease-out]">
-                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-5">
-                        <h4 class="text-lg font-bold text-gray-900 mb-2 border-b border-gray-50 pb-4">Upload Files</h4>
-                        <div class="grid grid-cols-2 gap-5">
-                            <div class="file-upload-wrapper">
-                                <i data-lucide="file-text" class="w-7 h-7 mx-auto text-gray-400 mb-3"></i>
-                                <span class="text-sm font-bold text-gray-700 block">Bank Stmt</span>
-                                <input type="file" id="s3_bank" accept=".pdf,image/*">
-                            </div>
-                            <div class="file-upload-wrapper">
-                                <i data-lucide="file-badge" class="w-7 h-7 mx-auto text-gray-400 mb-3"></i>
-                                <span class="text-sm font-bold text-gray-700 block">Form 16/16A</span>
-                                <input type="file" id="s3_form16" accept=".pdf,image/*">
-                            </div>
-                            <div class="file-upload-wrapper">
-                                <i data-lucide="bar-chart" class="w-7 h-7 mx-auto text-gray-400 mb-3"></i>
-                                <span class="text-sm font-bold text-gray-700 block">P&L Stmt</span>
-                                <input type="file" id="s3_pnl" accept=".pdf,image/*">
-                            </div>
-                            <div class="file-upload-wrapper">
-                                <i data-lucide="folder-plus" class="w-7 h-7 mx-auto text-gray-400 mb-3"></i>
-                                <span class="text-sm font-bold text-gray-700 block">Others</span>
-                                <input type="file" id="s3_others" accept=".pdf,image/*">
-                            </div>
-                        </div>
-                        <div class="pt-3">
-                            <label class="block text-sm text-gray-600 mb-2 font-bold">Name of Other Statement</label>
-                            <input type="text" id="s3_other_name" class="corp-input" placeholder="e.g., Capital Gains Report">
-                        </div>
+                <div id="step-itr-2" class="space-y-3 hidden">
+                    <select id="itrAy" class="corp-select" required>
+                        <option value="" disabled selected>Assessment Year *</option>
+                        <option value="2026-27">2026-27</option>
+                        <option value="2025-26">2025-26</option>
+                    </select>
+                    <select id="itrType" class="corp-select" required>
+                        <option value="" disabled selected>Return Type *</option>
+                        <option value="ITR1">ITR-1 (Sahaj)</option>
+                        <option value="ITR2">ITR-2</option>
+                        <option value="ITR3">ITR-3</option>
+                        <option value="ITR4">ITR-4 (Sugam)</option>
+                        <option value="ITR5">ITR-5</option>
+                        <option value="ITR6">ITR-6</option>
+                        <option value="ITR7">ITR-7</option>
+                        <option value="ITRU">ITR-U (Updated)</option>
+                    </select>
+                </div>
+                <div id="step-itr-3" class="hidden">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="file-upload-wrapper"><span class="text-[11px] font-bold block text-brand-slate mb-1">Bank Stmt *</span><input type="file" id="itrBank" required></div>
+                        <div class="file-upload-wrapper"><span class="text-[11px] font-bold block text-brand-slate mb-1">Form 16</span><input type="file" id="itrForm16"></div>
+                        <div class="file-upload-wrapper"><span class="text-[11px] font-bold block text-brand-slate mb-1">P&L Stmt</span><input type="file" id="itrPnl"></div>
+                        <div class="file-upload-wrapper"><span class="text-[11px] font-bold block text-brand-slate mb-1">Others</span><input type="file" id="itrOthers"></div>
                     </div>
                 </div>
             </form>
         </div>
-
-        <div id="itrModalFooter" class="p-6 border-t border-gray-200 bg-white shadow-sm">
-            <div class="flex gap-4 max-w-[600px] mx-auto">
-                <button type="button" id="btnBack" onclick="prevStep()" class="w-1/3 bg-white border border-gray-200 text-gray-900 font-bold py-4 rounded-xl hidden transition shadow-sm hover:bg-gray-50 text-base">Back</button>
-                <button type="button" id="btnNext" onclick="nextStep()" class="flex-1 bg-gray-900 text-white font-bold py-4 rounded-xl shadow-md transition hover:bg-black text-base">Next Step</button>
-                <button type="button" id="btnSubmit" onclick="submitItrFinal()" class="flex-1 bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-xl shadow-md hidden transition text-base flex items-center justify-center gap-2">Submit Application</button>
-            </div>
+        <div class="fixed bottom-[70px] w-full p-4 bg-white border-t border-gray-100 flex gap-3 z-20">
+            <button id="btn-itr-back" onclick="navStep('itr', -1)" class="w-1/3 bg-gray-50 text-brand-slate font-bold py-3 rounded-xl hidden text-sm">Back</button>
+            <button id="btn-itr-next" onclick="navStep('itr', 1)" class="flex-1 bg-brand-slate text-white font-bold py-3 rounded-xl shadow-sm text-sm">Next Step</button>
+            <button id="btn-itr-submit" onclick="submitCompliance('ITR')" class="flex-1 bg-brand-slate text-white font-bold py-3 rounded-xl shadow-sm hidden text-sm">Submit</button>
         </div>
     </div>
 
-    <!-- PAYMENT MODAL -->
-    <div id="paymentModal" class="page-modal fixed top-[64px] bottom-[64px] left-0 w-full z-[50] hidden flex-col bg-[#F8FAFC]">
-        <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center bg-white shadow-sm">
-            <h3 class="font-bold text-xl text-gray-900">Payment Portal</h3>
-            <button onclick="goHome()" class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-full text-gray-500 hover:text-gray-900"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <!-- GST MODAL -->
+    <div id="modal-gst" class="full-modal">
+        <div class="px-5 h-[56px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10 shrink-0">
+            <h3 class="font-bold text-base text-brand-slate">File GST</h3>
+            <button onclick="closeModal('modal-gst')"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
         </div>
-        <div class="overflow-y-auto no-scrollbar p-5 flex-grow">
-            <div class="max-w-[600px] mx-auto space-y-6 pt-1">
-                
-                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-5">
-                    <h4 class="text-lg font-bold text-gray-900 border-b border-gray-50 pb-4">Payment Details</h4>
-                    <div class="grid grid-cols-1 gap-5 pt-1">
-                        <div class="grid grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-2 font-bold">Amount <span class="text-red-600">*</span></label>
-                                <input type="number" id="payAmount" oninput="updatePaymentUI()" class="corp-input font-mono font-bold text-xl" placeholder="₹ 0" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-2 font-bold">App No / Ref</label>
-                                <input type="text" id="payAkn" oninput="updatePaymentUI()" class="corp-input uppercase font-mono text-sm" placeholder="APPLICATION">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-2 font-bold">Client Name <span class="text-red-600">*</span></label>
-                            <input type="text" id="payName" oninput="updatePaymentUI()" class="corp-input" placeholder="Full Name" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-2 font-bold">Auto Narration</label>
-                            <input type="text" id="payNarration" class="corp-input font-medium bg-gray-50 text-gray-500" placeholder="Auto-generated narration" readonly>
-                        </div>
-                        <div class="grid grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-2 font-bold">PAN <span class="text-red-600">*</span></label>
-                                <input type="text" id="payPan" class="corp-input uppercase font-mono" placeholder="PAN NUMBER" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-2 font-bold">Mobile <span class="text-red-600">*</span></label>
-                                <input type="tel" id="payMobile" class="corp-input" placeholder="Mobile No" required>
-                            </div>
-                        </div>
+        <div class="flex-grow overflow-y-auto p-5 pb-20 bg-white">
+            <form id="form-gst" class="max-w-[600px] mx-auto space-y-5">
+                <div class="flex justify-between border-b border-gray-200 pb-0 mb-4">
+                    <div id="nav-gst-1" class="w-1/3 text-center text-xs step-active pb-2">1. Firm</div>
+                    <div id="nav-gst-2" class="w-1/3 text-center text-xs step-inactive pb-2">2. Period</div>
+                    <div id="nav-gst-3" class="w-1/3 text-center text-xs step-inactive pb-2">3. Upload</div>
+                </div>
+                <div id="step-gst-1" class="space-y-3">
+                    <input type="text" id="gstName" class="corp-input bg-gray-50" readonly placeholder="Firm Name *">
+                    <input type="text" id="gstinNo" class="corp-input uppercase font-mono" placeholder="GSTIN *" maxlength="15" required>
+                    <input type="tel" id="gstMobile" class="corp-input" placeholder="Mobile Number *" maxlength="10" required>
+                    <input type="email" id="gstEmail" class="corp-input bg-gray-50" readonly placeholder="Email *">
+                </div>
+                <div id="step-gst-2" class="space-y-3 hidden">
+                    <select id="gstType" class="corp-select" required>
+                        <option value="" disabled selected>Return Type *</option>
+                        <option value="Regular">Regular</option>
+                        <option value="Composition">Composition</option>
+                        <option value="Annual">Annual</option>
+                    </select>
+                    <select id="gstPeriod" class="corp-select" required>
+                        <option value="" disabled selected>Return Period *</option>
+                        <option value="Apr-2026">Apr 2026</option>
+                        <option value="May-2026">May 2026</option>
+                        <option value="Jun-2026">Jun 2026</option>
+                        <option value="Jul-2026">Jul 2026</option>
+                        <option value="Q1-2026">Q1 (Apr-Jun 2026)</option>
+                        <option value="Q2-2026">Q2 (Jul-Sep 2026)</option>
+                    </select>
+                </div>
+                <div id="step-gst-3" class="hidden">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="file-upload-wrapper"><span class="text-[11px] font-bold block text-brand-slate mb-1">Sales Stmt *</span><input type="file" id="gstSales" required></div>
+                        <div class="file-upload-wrapper"><span class="text-[11px] font-bold block text-brand-slate mb-1">Purchase Stmt</span><input type="file" id="gstPur"></div>
+                        <div class="file-upload-wrapper"><span class="text-[11px] font-bold block text-brand-slate mb-1">Bank Stmt</span><input type="file" id="gstBank"></div>
+                        <div class="file-upload-wrapper"><span class="text-[11px] font-bold block text-brand-slate mb-1">Others</span><input type="file" id="gstOthers"></div>
                     </div>
                 </div>
-
-                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center text-center">
-                    <h4 class="text-lg font-bold text-gray-900 mb-2">Scan to Pay via Any UPI App</h4>
-                    <p class="text-sm text-gray-500 mb-5 font-medium px-2">Amount is not fixed in QR. Please verify narration and enter your amount.</p>
-                    <div class="p-4 bg-white border border-gray-200 rounded-2xl shadow-sm mb-5 inline-block relative">
-                        <img id="upiQrCode" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3Daccountree%40ybl%26pn%3DAccountree" alt="UPI QR Code" class="w-48 h-48 object-contain">
-                    </div>
-                    <div class="bg-gray-50 rounded-xl border border-gray-200 p-4 w-full flex justify-between items-center shadow-sm">
-                        <div class="flex flex-col text-left">
-                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">UPI ID</span>
-                            <span class="text-base font-bold text-gray-900 mt-1">accountree@ybl</span>
-                        </div>
-                        <button onclick="copyText('accountree@ybl')" class="p-3 bg-white rounded-xl border border-gray-200 text-gray-600 hover:text-gray-900 shadow-sm"><i data-lucide="copy" class="w-5 h-5"></i></button>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <h4 class="text-lg font-bold text-gray-900 mb-5">Quick Pay via UPI</h4>
-                    <div class="grid grid-cols-3 gap-5">
-                        <a id="btnGpay" href="upi://pay?pa=accountree@ybl&pn=Accountree&cu=INR" class="bg-white border border-gray-200 rounded-2xl py-5 flex flex-col items-center justify-center gap-3 hover:border-gray-400 transition shadow-sm">
-                            <div class="w-10 h-10 rounded-full border-[5px] border-[#4285F4] border-t-[#EA4335] border-r-[#FBBC05] border-b-[#34A853]"></div>
-                            <span class="text-sm font-bold text-gray-700">GPay</span>
-                        </a>
-                        <a id="btnPhonePe" href="upi://pay?pa=accountree@ybl&pn=Accountree&cu=INR" class="bg-white border border-gray-200 rounded-2xl py-5 flex flex-col items-center justify-center gap-3 hover:border-purple-400 transition shadow-sm">
-                            <div class="w-10 h-10 rounded-lg bg-[#5f259f] text-white flex items-center justify-center font-bold text-xl leading-none">पे</div>
-                            <span class="text-sm font-bold text-gray-700">PhonePe</span>
-                        </a>
-                        <a id="btnPaytm" href="upi://pay?pa=accountree@ybl&pn=Accountree&cu=INR" class="bg-white border border-gray-200 rounded-2xl py-5 flex flex-col items-center justify-center gap-3 hover:border-blue-400 transition shadow-sm">
-                            <div class="w-auto px-2 h-10 rounded-lg bg-[#002970] text-white flex items-center justify-center font-bold text-sm leading-none">Paytm</div>
-                            <span class="text-sm font-bold text-gray-700">Paytm</span>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-center">
-                    <h4 class="text-lg font-bold text-gray-900 mb-2 text-left">Credit / Debit / Netbanking</h4>
-                    <p class="text-sm text-gray-500 mb-6 text-left">Standard gateway charges apply to card transactions.</p>
-                    <button onclick="payViaRazorpayLink()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-md transition text-base">
-                        <i data-lucide="credit-card" class="w-5 h-5"></i> <span id="rzpBtnText">Pay via Razorpay</span> 
-                        <span class="bg-white/20 text-white text-xs px-2.5 py-1 rounded ml-1 tracking-wide">+ 2% fee</span>
-                    </button>
-                </div>
-
-                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <h4 class="text-lg font-bold text-gray-900 mb-4">Upload Payment Receipt</h4>
-                    <div class="file-upload-wrapper !py-8 mb-5">
-                        <i data-lucide="image" class="w-8 h-8 mx-auto text-gray-400 mb-3"></i>
-                        <span class="text-base font-bold text-gray-700 block">Select Screenshot</span>
-                        <input type="file" id="payProof" accept="image/*,.pdf">
-                    </div>
-                    <button id="paySubmitBtn" onclick="submitPaymentForm()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-xl shadow-md text-base transition">Generate Payment Request</button>
-                </div>
-            </div>
+            </form>
+        </div>
+        <div class="fixed bottom-[70px] w-full p-4 bg-white border-t border-gray-100 flex gap-3 z-20">
+            <button id="btn-gst-back" onclick="navStep('gst', -1)" class="w-1/3 bg-gray-50 text-brand-slate font-bold py-3 rounded-xl hidden text-sm">Back</button>
+            <button id="btn-gst-next" onclick="navStep('gst', 1)" class="flex-1 bg-brand-slate text-white font-bold py-3 rounded-xl shadow-sm text-sm">Next Step</button>
+            <button id="btn-gst-submit" onclick="submitCompliance('GST')" class="flex-1 bg-brand-slate text-white font-bold py-3 rounded-xl shadow-sm hidden text-sm">Submit</button>
         </div>
     </div>
 
-    <!-- SEARCH MODAL -->
-    <div id="searchModal" class="page-modal fixed top-[64px] bottom-[64px] left-0 w-full z-[50] hidden flex-col bg-[#F8FAFC]">
-        <div class="px-5 py-4 flex gap-4 items-center border-b border-gray-200 bg-white shadow-sm">
-            <div class="flex-grow relative">
-                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                <input type="text" id="searchInput" onkeyup="filterSearch()" placeholder="Search services..." class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 pl-12 pr-4 text-base text-gray-900 outline-none focus:border-gray-900 transition shadow-sm" autofocus>
+    <!-- PAYMENTS MODAL (Dues Listing) -->
+    <div id="modal-payment" class="full-modal">
+        <div class="px-5 h-[56px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 shrink-0">
+            <h3 class="font-bold text-base text-brand-slate">Pending Dues</h3>
+            <button onclick="closeModal('modal-payment')"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
+        </div>
+        <div class="flex-grow p-5 space-y-5 bg-white overflow-y-auto">
+            <div id="paymentDuesList" class="space-y-3">
+                <div class="text-center py-4"><i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto text-gray-400"></i></div>
             </div>
-            <button onclick="goHome()" class="text-base font-bold text-gray-600 hover:text-gray-900 transition">Cancel</button>
-        </div>
-        <div class="flex-grow overflow-y-auto p-6 max-w-[600px] mx-auto w-full">
-            <p class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-5">Quick Links</p>
-            <div id="searchResultsList" class="space-y-4">
-                <div class="search-item flex items-center p-4 bg-white border border-gray-200 shadow-sm rounded-2xl cursor-pointer hover:border-gray-900 transition" onclick="openItrModal();"><i data-lucide="file-text" class="w-6 h-6 text-gray-700 mr-4"></i><span class="text-base font-bold text-gray-900 search-text">File Income Tax Return (ITR)</span></div>
-                <div class="search-item flex items-center p-4 bg-white border border-gray-200 shadow-sm rounded-2xl cursor-pointer hover:border-gray-900 transition" onclick="openPaymentModal();"><i data-lucide="indian-rupee" class="w-6 h-6 text-gray-700 mr-4"></i><span class="text-base font-bold text-gray-900 search-text">Make a Tax Payment</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- UPLOAD MODAL -->
-    <div id="uploadModal" class="page-modal fixed top-[64px] bottom-[64px] left-0 w-full z-[50] hidden flex-col bg-[#F8FAFC]">
-        <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center bg-white shadow-sm">
-            <h3 class="font-bold text-xl text-gray-900">Upload Document</h3>
-            <button onclick="goHome()" class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-full text-gray-500 hover:text-gray-900"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-        <div class="p-6 bg-brand-bg flex-grow">
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-5 max-w-[600px] mx-auto pt-5">
-                <input type="text" id="uploadAppNo" class="corp-input text-lg" placeholder="PAN or Application No" required>
-                <div class="file-upload-wrapper !py-12">
-                    <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-gray-500 mb-3"></i>
-                    <span class="text-base font-bold block text-gray-700">Tap to select file</span>
-                    <input type="file" id="uploadDocFile" required>
-                </div>
-                <button onclick="submitUploadModal()" id="uploadSubmitBtn" class="w-full bg-gray-900 hover:bg-black transition text-white font-bold py-4 rounded-xl shadow-md text-base mt-2">Upload</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- EMAIL LOGIN & GOOGLE AUTH LOGIN MODAL -->
-    <div id="loginScreen" class="fixed inset-0 z-[120] hidden flex-col bg-gray-900/70 backdrop-blur-md transition-opacity items-center justify-center px-5 overflow-y-auto">
-        <div class="bg-white rounded-[32px] w-full max-w-[420px] p-8 shadow-2xl relative flex flex-col items-center animate-[zoomIn_0.3s_ease-out] my-auto">
-            <button onclick="closeLoginModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-900 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
             
-            <div class="w-20 h-20 bg-gray-900 rounded-2xl flex items-center justify-center mb-6 shadow-md mt-2">
-                <img src="assets/logo.png" alt="CM TaxApp" class="w-12 h-12 object-contain filter brightness-0 invert">
-            </div>
-            <h1 class="text-3xl font-black text-gray-900 tracking-tight mb-2">Welcome Back</h1>
-            <p class="text-gray-500 text-base mb-8 text-center leading-relaxed">Sign in to your dashboard securely.</p>
-
-            <div class="w-full space-y-5 mb-6">
-                <input type="email" id="loginEmail" class="corp-input bg-gray-50" placeholder="Email Address">
-                <div class="relative">
-                    <input type="password" id="loginPassword" class="corp-input bg-gray-50 pr-12" placeholder="Password">
-                    <button type="button" onclick="togglePassword('loginPassword', 'eyeIcon')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition">
-                        <i id="eyeIcon" data-lucide="eye" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <div class="flex justify-between items-center px-1 py-1">
-                    <label class="flex items-center gap-2 text-gray-600 cursor-pointer select-none">
-                        <input type="checkbox" id="rememberMeCheckbox" class="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900 cursor-pointer">
-                        <span class="font-medium text-sm">Remember me</span>
-                    </label>
-                    <a href="#" class="text-gray-900 font-bold text-sm hover:underline">Forgot?</a>
-                </div>
-                <button type="button" id="btnEmailLogin" onclick="processEmailLogin()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-xl shadow-md transition text-base">Sign In</button>
-            </div>
-
-            <!-- Divider -->
-            <div class="w-full flex items-center gap-4 mb-6">
-                <div class="h-px bg-gray-200 flex-grow"></div>
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Or continue with</span>
-                <div class="h-px bg-gray-200 flex-grow"></div>
-            </div>
-
-            <!-- Google Auth Container -->
-            <div id="googleAuthContainer" class="w-full flex justify-center mb-6"></div>
-
-            <p class="text-xs text-gray-400 text-center mt-2 px-4">By continuing, you agree to our <a href="privacy.html" class="underline hover:text-gray-700">Privacy Policy</a>.</p>
-        </div>
-    </div>
-
-    <!-- PAYMENT INITIATED SUCCESS MODAL OVERLAY -->
-    <div id="paymentSuccessModal" class="fixed inset-0 z-[150] hidden flex-col bg-gray-900/80 backdrop-blur-sm justify-center items-center px-5 transition-opacity">
-        <div class="bg-[#1F2937] border border-gray-700 rounded-[32px] w-full max-w-[360px] p-8 shadow-2xl flex flex-col items-center animate-[zoomIn_0.3s_ease-out]">
-            <div class="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 mb-6 border-2 border-blue-500/50">
-                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <path class="animated-check" d="M20 6L9 17l-5-5"/>
-                </svg>
-            </div>
-            <h3 class="text-center font-bold text-2xl text-white mb-2">Payment Initiated</h3>
-            <p class="text-center text-base text-gray-300 mb-6">Your payment request has been securely generated.</p>
-            <div class="bg-gray-900/50 border border-gray-700 rounded-xl p-4 w-full mb-6 text-center shadow-inner">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Transaction Number</p>
-                <p id="successPtrnNo" class="font-mono font-bold text-white text-2xl tracking-wider"></p>
-            </div>
-            <button onclick="closePaymentSuccessModal()" class="w-full bg-white text-gray-900 py-4 rounded-2xl font-bold shadow-md hover:bg-gray-100 transition text-base">Done</button>
-        </div>
-    </div>
-
-    <!-- ITR SUBMISSION SUCCESS MODAL OVERLAY -->
-    <div id="itrSuccessModal" class="fixed inset-0 z-[150] hidden flex-col bg-gray-900/80 backdrop-blur-sm justify-center items-center px-5 transition-opacity">
-        <div class="bg-[#1F2937] border border-gray-700 rounded-[32px] w-full max-w-[360px] p-8 shadow-2xl flex flex-col items-center animate-[zoomIn_0.3s_ease-out]">
-            <div class="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 mb-5 border-2 border-green-500/50">
-                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <path class="animated-check" d="M20 6L9 17l-5-5"/>
-                </svg>
-            </div>
-            <h3 class="text-center font-bold text-2xl text-white mb-2">Submission Successful</h3>
-            <p class="text-center text-base text-gray-300 mb-6">Your documents have been securely transmitted.</p>
-            <div class="bg-gray-900/50 border border-gray-700 rounded-xl p-4 w-full mb-6 text-center shadow-inner">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Reference Number</p>
-                <p id="successAppNo" class="font-mono font-bold text-white text-xl tracking-wider"></p>
-            </div>
-            <div class="w-full space-y-4">
-                <button onclick="whatsappITR()" class="w-full bg-[#25D366] text-white font-bold py-4 rounded-xl shadow-md flex items-center justify-center gap-2 hover:bg-green-600 transition text-base">
-                    <i data-lucide="message-square" class="w-5 h-5"></i> Fast Processing
-                </button>
-                <button onclick="openPaymentModal(); closeItrSuccessModal();" class="w-full bg-white text-gray-900 font-bold py-4 rounded-xl shadow-md flex items-center justify-center gap-2 hover:bg-gray-100 transition text-base">
-                    <i data-lucide="indian-rupee" class="w-5 h-5"></i> Proceed to Payment
-                </button>
-                <button onclick="closeItrSuccessModal()" class="w-full bg-transparent text-gray-400 font-bold py-2 rounded-xl hover:text-white transition text-base">
-                    Done
-                </button>
+            <div id="qrBlock" class="bg-gray-50 p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center hidden">
+                <p class="text-xs text-gray-500 uppercase font-bold mb-1">Scan to Pay</p>
+                <p id="payDispAmount" class="font-black text-2xl text-brand-red mb-3">₹ 0.00</p>
+                <img id="payQrCode" src="" class="w-40 h-40 mb-4 border p-2 rounded-xl bg-white shadow-sm">
+                <div class="file-upload-wrapper w-full bg-white !p-4"><span class="text-xs font-bold block text-brand-slate"><i data-lucide="upload" class="inline w-3 h-3 mr-1"></i> Upload Receipt</span><input type="file" id="payProof"></div>
+                <input type="hidden" id="payAppNoSelected">
+                <button id="paySubmitBtn" onclick="submitPayment()" class="w-full bg-brand-slate text-white font-bold py-3.5 rounded-xl mt-4 shadow-sm text-sm">Confirm Payment</button>
             </div>
         </div>
     </div>
 
-    <!-- MAIN SCRIPTS -->
+    <!-- MY FILINGS MODAL -->
+    <div id="modal-clients" class="full-modal">
+        <div class="px-5 h-[56px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 shrink-0">
+            <h3 class="font-bold text-base text-brand-slate">My Filings</h3>
+            <button onclick="closeModal('modal-clients')"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
+        </div>
+        <div class="flex-grow p-5 bg-white overflow-y-auto">
+            <div id="myFilingsList" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <!-- TAX UPDATES MODAL -->
+    <div id="modal-taxupdates" class="full-modal">
+        <div class="px-5 h-[56px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 shrink-0">
+            <h3 class="font-bold text-base text-brand-slate">Tax Updates</h3>
+            <button onclick="closeModal('modal-taxupdates')"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
+        </div>
+        <div class="flex-grow p-5 bg-white overflow-y-auto">
+            <div id="taxUpdatesList" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <!-- CALENDAR MODAL -->
+    <div id="modal-calendar" class="full-modal">
+        <div class="px-5 h-[56px] border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 shrink-0">
+            <h3 class="font-bold text-base text-brand-slate">Compliance Calendar</h3>
+            <button onclick="closeModal('modal-calendar')"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
+        </div>
+        <div class="flex-grow p-5 bg-white overflow-y-auto">
+            <div id="calendarList" class="space-y-3"></div>
+        </div>
+    </div>
+
     <script>
         lucide.createIcons();
-
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxY5VHAOIBC2rDv305WJJm-iuKfi9bjxvV-rRhR9E9mJcPeBgMBX6aYw-nbrWcGeQ6C0A/exec';
+        let userState = null;
+        let globalDashboardData = [];
 
-        // ROUTER
-        function goHome() {
-            document.querySelectorAll('.page-modal').forEach(m => { m.classList.add('hidden'); m.classList.remove('flex', 'block'); });
-            closeMenu(); document.getElementById('mainApp').scrollTo(0,0);
-        }
-
-        // SEQ NUMBERS - Exact Logic: ITR 4 26 4 0001
-        function getNextItrAppNo() {
-            let lastNo = parseInt(localStorage.getItem('itrLastSeq') || "0", 10);
-            lastNo++; localStorage.setItem('itrLastSeq', lastNo.toString());
-            const yy = String(new Date().getFullYear()).slice(-2); // e.g. "26"
-            return `ITR4${yy}4${String(lastNo).padStart(4, '0')}`;
-        }
-
-        function getNextTrnNo() {
-            let lastNo = parseInt(localStorage.getItem('trnLastSeq') || "0", 10);
-            lastNo++; localStorage.setItem('trnLastSeq', lastNo.toString());
-            return `TRN4${String(lastNo).padStart(3, '0')}`;
-        }
-
-        // LOCAL STORAGE
-        let currentUser = { name: "Guest User", email: "guest@example.com", picture: "" };
+        // Global Loader Functions
+        function showLoader() { document.getElementById('globalLoader').style.display = 'flex'; }
+        function hideLoader() { document.getElementById('globalLoader').style.display = 'none'; }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedSession = localStorage.getItem('taxAppSession');
-            if (savedSession) { currentUser = JSON.parse(savedSession); populateUserData(); }
-            setTimeout(() => {
-                const splash = document.getElementById('splash');
-                if (splash) { splash.style.opacity = "0"; setTimeout(() => splash.remove(), 500); }
-                calculateCountdown();
-            }, 1000);
+            const splash = document.getElementById('splash');
+            if (splash) setTimeout(() => { splash.style.opacity = '0'; setTimeout(() => splash.remove(), 500); }, 1500);
+            
+            const saved = localStorage.getItem('taxHubUser');
+            if (saved) { userState = JSON.parse(saved); initDashboard(); }
+            else { navigateTo('login'); }
         });
 
-        // GOOGLE LOGIN
+        // --- AUTHENTICATION ---
         const GOOGLE_CLIENT_ID = "753272952222-c1pgj8cb8g7vte82sp6kevd3mku17cca.apps.googleusercontent.com"; 
         window.onload = function () {
-            try {
-                if(typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-                    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse, cancel_on_tap_outside: false });
-                    google.accounts.id.renderButton(document.getElementById("googleAuthContainer"), { theme: "outline", size: "large", width: 280, text: "continue_with" });
-                }
-            } catch (error) { console.warn("Google Sign-In disabled."); }
+            if(typeof google !== 'undefined') {
+                google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleAuth });
+                google.accounts.id.renderButton(document.getElementById("googleAuthContainer"), { theme: "outline", size: "large", width: 280 });
+            }
         };
 
-        function parseJwt (token) {
-            var base64Url = token.split('.')[1]; var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join('')); return JSON.parse(jsonPayload);
-        }
-
-        function handleCredentialResponse(response) {
-            const data = parseJwt(response.credential);
-            currentUser.name = data.name; currentUser.email = data.email; currentUser.picture = data.picture;
-            localStorage.setItem('taxAppSession', JSON.stringify(currentUser));
-            populateUserData(); closeLoginModal(); logUserSignIn(currentUser.name, currentUser.email);
-            showToast("Successfully Logged In", false, true);
-        }
-
-        // 1. SECURE EMAIL LOGIN
-        function processEmailLogin() {
-            const btn = document.getElementById('btnEmailLogin');
-            if (btn.disabled) return;
+        function handleAuth(response) {
+            const data = JSON.parse(decodeURIComponent(window.atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            showLoader();
             
-            const email = (document.getElementById('loginEmail').value || "").trim();
-            const pass = (document.getElementById('loginPassword').value || "").trim();
-            const rememberMe = document.getElementById('rememberMeCheckbox').checked;
+            fetch(`${SCRIPT_URL}?action=VERIFY_LOGIN_GET&email=${encodeURIComponent(data.email)}&name=${encodeURIComponent(data.name)}`)
+            .then(res => res.json())
+            .then(resData => {
+                hideLoader();
+                if(resData.status === "success") {
+                    userState = { clientId: resData.clientId, name: resData.name, email: resData.email, picture: data.picture, mobile: resData.mobile, pan: resData.pan, gstin: resData.gstin };
+                    localStorage.setItem('taxHubUser', JSON.stringify(userState));
+                    initDashboard();
+                    showToast(resData.clientId === "NEW" ? "Welcome! Account pending review." : "Logged In Successfully");
+                } else { showToast("Login failed.", true); }
+            }).catch(() => { hideLoader(); showToast("Connection error. Please try again.", true); });
+        }
 
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email || !emailRegex.test(email)) { 
-                showToast("Please enter a valid full email address", true); 
-                return; 
-            }
-            if (!pass) { 
-                showToast("Please enter your password", true); 
-                return; 
-            }
+        function logout() { localStorage.removeItem('taxHubUser'); userState = null; closeMenu(); closeAllModals(); navigateTo('login'); }
+
+        // --- ROUTING & UI ---
+        function navigateTo(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-' + viewId).classList.remove('hidden');
             
-            btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Signing In...`;
-            lucide.createIcons();
-            
-            fetch(`${SCRIPT_URL}?action=VERIFY_LOGIN&email=${encodeURIComponent(email)}&password=${encodeURIComponent(pass)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.valid) {
-                        currentUser.name = data.name;
-                        currentUser.email = email.toLowerCase();
-                        if (rememberMe) localStorage.setItem('taxAppSession', JSON.stringify(currentUser));
-                        populateUserData();
-                        closeLoginModal();
-                        logUserSignIn(currentUser.name, currentUser.email);
-                        showToast("Successfully Logged In", false, true);
-                    } else {
-                        showToast("Invalid Email or Password", true);
-                    }
-                })
-                .catch(() => showToast("Error connecting to server", true))
-                .finally(() => { btn.disabled = false; btn.innerHTML = "Sign In"; lucide.createIcons(); });
+            const isLogin = viewId === 'login';
+            document.getElementById('app-header').style.display = isLogin ? 'none' : 'flex';
+            document.getElementById('app-mobnav').style.display = isLogin ? 'none' : 'flex';
         }
 
-        function togglePassword(inputId, iconId) {
-            const input = document.getElementById(inputId); const icon = document.getElementById(iconId);
-            if(input.type === 'password') { input.type = 'text'; icon.setAttribute('data-lucide', 'eye-off'); } 
-            else { input.type = 'password'; icon.setAttribute('data-lucide', 'eye'); }
-            lucide.createIcons();
+        function openModal(id) { 
+            closeAllModals(); // Close others first
+            document.getElementById(id).classList.add('active'); 
+            if(id === 'modal-clients') fetchMyFilings();
+            if(id === 'modal-taxupdates') fetchTaxUpdates();
+            if(id === 'modal-calendar') fetchCalendar(false);
         }
-
-        function logUserSignIn(name, email) {
-            const payload = { "action": "USER_LOGIN", "Name": name, "Email": email };
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' }).catch(err => console.error(err));
-        }
-
-        function populateUserData() {
-            if(currentUser.name !== "Guest User") {
-                document.getElementById('navProfileText').innerText = "Profile";
-                document.getElementById('welcomeHeading').innerText = "Welcome Back, " + currentUser.name.split(' ')[0];
-                fetchDashboardStatus();
-            } else {
-                document.getElementById('welcomeHeading').innerText = "Welcome Back";
-                document.getElementById('dashboardStatusContainer').classList.add('hidden');
-            }
-
-            document.getElementById('s1_name').value = currentUser.name !== "Guest User" ? currentUser.name : "";
-            document.getElementById('s1_email').value = currentUser.email !== "guest@example.com" ? currentUser.email : "";
-            const initials = currentUser.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-            
-            if(currentUser.picture) {
-                document.getElementById('headerAvatarIcon').parentElement.classList.add('hidden');
-                document.getElementById('headerAvatarImg').src = currentUser.picture;
-                document.getElementById('headerAvatarImg').classList.remove('hidden');
-                document.getElementById('navAvatar').src = currentUser.picture;
-                document.getElementById('navAvatar').classList.remove('hidden');
-                document.getElementById('navInitials').classList.add('hidden');
-            } else {
-                document.getElementById('navInitials').innerText = initials;
-            }
-            document.getElementById('navName').innerText = currentUser.name;
-            document.getElementById('navEmail').innerText = currentUser.email;
-            document.getElementById('navSignInBtn').classList.add('hidden');
-            document.getElementById('navSignOutBtn').classList.remove('hidden');
-            document.getElementById('navSignOutBtn').classList.add('flex');
-        }
-
-        function handleLogout() {
-            localStorage.removeItem('taxAppSession');
-            currentUser = { name: "Guest User", email: "guest@example.com", picture: "" };
-            document.getElementById('navProfileText').innerText = "Login";
-            document.getElementById('navName').innerText = currentUser.name;
-            document.getElementById('navEmail').innerText = currentUser.email;
-            document.getElementById('navInitials').innerText = "GU";
-            document.getElementById('navInitials').classList.remove('hidden');
-            document.getElementById('navAvatar').classList.add('hidden');
-            document.getElementById('headerAvatarImg').classList.add('hidden');
-            document.getElementById('headerAvatarIcon').parentElement.classList.remove('hidden');
-            document.getElementById('navSignInBtn').classList.remove('hidden');
-            document.getElementById('navSignOutBtn').classList.add('hidden');
-            document.getElementById('navSignOutBtn').classList.remove('flex');
-            
-            document.getElementById('welcomeHeading').innerText = "Welcome Back";
-            document.getElementById('dashboardStatusContainer').classList.add('hidden');
-            
-            goHome(); showToast("Logged out successfully");
-        }
-
-        function handleProfileClick() { goHome(); if(currentUser.email !== "guest@example.com") { openMyFilingsModal(); } else { openLoginModal(); } }
-
-        // Fetch Dashboard Status
-        function fetchDashboardStatus() {
-            const container = document.getElementById('dashboardStatusContainer');
-            const content = document.getElementById('dashboardStatusContent');
-            container.classList.remove('hidden');
-            content.innerHTML = `<p class="text-sm text-gray-500 font-medium flex items-center gap-2 mb-4"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Checking recent status...</p>`;
-            lucide.createIcons();
-            
-            fetch(`${SCRIPT_URL}?action=GET_USER_DATA&email=${encodeURIComponent(currentUser.email)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        const item = data[0]; 
-                        let compStatus = item.Status === "Completed" && item.AknNo ? `Completed (AKN: ${item.AknNo})` : item.Status;
-                        let isDue = !isNaN(parseFloat(item.PaymentStatus)) && parseFloat(item.PaymentStatus) > 0;
-                        let payStatusText = isDue ? `Due Rs. ${parseFloat(item.PaymentStatus).toFixed(2)}` : item.PaymentStatus;
-                        
-                        let payBtn = isDue ? `<button onclick="payDue('${item.AppNo}', '${item.PaymentStatus}')" class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 transition shadow-sm w-full mt-2">Pay Due Now</button>` : '';
-
-                        content.innerHTML = `
-                            <div class="bg-white rounded-[24px] p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-3">
-                                <div class="flex justify-between items-center border-b border-gray-50 pb-3">
-                                    <span class="text-sm font-bold text-gray-900">${item.FY} - ${item.HeadOfIncome}</span>
-                                    <span class="text-xs font-mono text-gray-500 bg-gray-50 px-2 py-1 rounded">${item.AppNo}</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Compliance</span>
-                                    <span class="text-sm font-bold text-gray-900">${compStatus}</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</span>
-                                    <span class="text-sm font-bold ${isDue ? 'text-red-600' : 'text-green-600'}">${payStatusText}</span>
-                                </div>
-                                ${payBtn}
-                            </div>
-                        `;
-                    } else {
-                        content.innerHTML = `<p class="text-sm text-gray-500 font-medium mb-4">No recent filings found.</p>`;
-                    }
-                })
-                .catch(() => { content.innerHTML = `<p class="text-sm text-red-500 font-medium mb-4">Failed to load status.</p>`; });
-        }
-
-        // Dedicated Payment Navigation
-        function payDue(appNo, amount) {
-            document.querySelectorAll('.page-modal').forEach(m => { m.classList.add('hidden'); m.classList.remove('flex', 'block'); });
-            openPaymentModal();
-            document.getElementById('payAkn').value = appNo;
-            document.getElementById('payAmount').value = parseFloat(amount).toFixed(2);
-            document.getElementById('payName').value = currentUser.name !== "Guest User" ? currentUser.name : "";
-            updatePaymentUI();
-        }
-
-        // 6. MY FILINGS (FIXED ALIGNMENT AS PER 1000828759.jpg)
-        function openMyFilingsModal() {
-            goHome(); document.getElementById('myFilingsModal').classList.remove('hidden'); document.getElementById('myFilingsModal').classList.add('flex');
-            const container = document.getElementById('myFilingsContainer');
-            container.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-24 text-gray-400">
-                    <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-4"></i>
-                    <p class="text-base font-semibold text-gray-600">Loading your records...</p>
-                </div>`;
-            lucide.createIcons();
-
-            fetch(`${SCRIPT_URL}?action=GET_USER_DATA&email=${encodeURIComponent(currentUser.email)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if(data.length === 0) {
-                        container.innerHTML = `
-                            <div class="flex flex-col items-center justify-center py-16 text-center">
-                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                    <i data-lucide="folder-search" class="w-8 h-8 text-gray-400"></i>
-                                </div>
-                                <h4 class="text-xl font-bold text-gray-900 mb-2">No Filings Found</h4>
-                                <p class="text-base text-gray-500">You haven't filed any returns yet.</p>
-                                <button onclick="openItrModal();" class="mt-6 bg-gray-900 text-white font-bold py-3.5 px-8 rounded-xl text-base hover:bg-black">File ITR Now</button>
-                            </div>`;
-                    } else {
-                        container.innerHTML = '';
-                        data.forEach(item => {
-                            const dateStr = new Date(item.Date).toLocaleDateString('en-IN', {day: 'numeric', month:'short', year:'numeric'});
-                            let compStatus = item.Status === "Completed" && item.AknNo ? `Completed (AKN: ${item.AknNo})` : item.Status;
-                            let isDue = !isNaN(parseFloat(item.PaymentStatus)) && parseFloat(item.PaymentStatus) > 0;
-                            let payStatusText = isDue ? `Due Rs. ${parseFloat(item.PaymentStatus).toFixed(2)}` : item.PaymentStatus;
-                            let payBtn = isDue ? `<button onclick="payDue('${item.AppNo}', '${item.PaymentStatus}')" class="mt-2 text-xs font-bold bg-indigo-600 text-white px-3 py-2 rounded-lg shadow-sm hover:bg-indigo-700 transition w-full text-center">Pay Due Now</button>` : '';
-
-                            // Updated Card Layout fixing the squished horizontal layout issue
-                            const card = `
-                                <div class="bg-white p-5 rounded-[20px] shadow-sm border border-gray-100 flex flex-col gap-4 relative">
-                                    <div class="flex items-start gap-4">
-                                        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
-                                            <i data-lucide="file-check" class="w-6 h-6"></i>
-                                        </div>
-                                        <div class="flex-grow pr-2">
-                                            <h4 class="text-sm font-bold text-gray-900 leading-tight">${item.FY} - ${item.HeadOfIncome}</h4>
-                                            <p class="text-xs text-gray-500 font-mono mt-1 bg-gray-50 inline-block px-1.5 py-0.5 rounded">${item.AppNo}</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="bg-gray-50 rounded-xl p-3 flex flex-col gap-2">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Compliance</span>
-                                            <span class="text-xs font-bold text-gray-900 text-right">${compStatus}</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Payment</span>
-                                            <span class="text-xs font-bold ${isDue ? 'text-red-600' : 'text-gray-900'} text-right">${payStatusText}</span>
-                                        </div>
-                                        ${payBtn}
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-[10px] text-gray-400 font-medium">${dateStr}</span>
-                                    </div>
-                                </div>
-                            `;
-                            container.innerHTML += card;
-                        });
-                    }
-                    lucide.createIcons();
-                })
-                .catch(err => { container.innerHTML = `<p class="text-center text-base text-red-500 font-bold py-10">Error loading data. Please try again later.</p>`; });
-        }
-
-        // MODALS
-        function openLoginModal() { document.getElementById('loginScreen').classList.remove('hidden'); document.getElementById('loginScreen').classList.add('flex'); setTimeout(() => { document.getElementById('loginScreen').style.opacity = '1'; }, 10); }
-        function closeLoginModal() { document.getElementById('loginScreen').style.opacity = '0'; setTimeout(() => { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('flex'); }, 300); }
-        function openMenu() { document.getElementById('sideMenu').classList.remove('hidden'); document.getElementById('sideMenu').classList.add('block'); }
-        function closeMenu() { document.getElementById('sideMenu').classList.add('hidden'); document.getElementById('sideMenu').classList.remove('block'); }
-        function openPaymentSuccessModal() { document.getElementById('paymentSuccessModal').classList.remove('hidden'); document.getElementById('paymentSuccessModal').classList.add('flex'); }
-        function closePaymentSuccessModal() { document.getElementById('paymentSuccessModal').classList.add('hidden'); document.getElementById('paymentSuccessModal').classList.remove('flex'); }
-        function closeItrSuccessModal() { document.getElementById('itrSuccessModal').classList.add('hidden'); document.getElementById('itrSuccessModal').classList.remove('flex'); }
-        function openSearch() { goHome(); document.getElementById('searchModal').classList.remove('hidden'); document.getElementById('searchModal').classList.add('flex'); document.getElementById('searchInput').focus(); }
-        function closeSearch() { document.getElementById('searchModal').classList.add('hidden'); document.getElementById('searchModal').classList.remove('flex'); }
-        function openPaymentModal() { goHome(); document.getElementById('paymentModal').classList.remove('hidden'); document.getElementById('paymentModal').classList.add('flex'); }
-        function closePaymentModal() { document.getElementById('paymentModal').classList.add('hidden'); document.getElementById('paymentModal').classList.remove('flex'); }
-        function openUploadModal() { goHome(); document.getElementById('uploadModal').classList.remove('hidden'); document.getElementById('uploadModal').classList.add('flex'); }
-
-        function showToast(message, isError = false, isSuccessGreen = false) {
-            const toast = document.getElementById('toast');
-            toast.className = 'toast'; 
-            if (isError) { toast.classList.add('error'); toast.innerHTML = `<i data-lucide="alert-circle" class="w-6 h-6"></i> <span>${message}</span>`; } 
-            else if (isSuccessGreen) { toast.classList.add('success'); toast.innerHTML = `<i data-lucide="check-circle" class="w-6 h-6"></i> <span>${message}</span>`; } 
-            else { toast.classList.add('default'); toast.innerHTML = `<i data-lucide="info" class="w-6 h-6 text-white"></i> <span>${message}</span>`; }
-            lucide.createIcons(); toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3500);
-        }
-
-        function filterSearch() {
-            let input = document.getElementById('searchInput').value.toLowerCase();
-            let items = document.querySelectorAll('.search-item');
-            items.forEach(item => {
-                let text = item.querySelector('.search-text').innerText.toLowerCase();
-                if(text.includes(input)) { item.style.display = 'flex'; } else { item.style.display = 'none'; }
-            });
-        }
-
-        // PAYMENT UI
-        function updatePaymentUI() {
-            let amt = parseFloat(document.getElementById('payAmount').value) || 0;
-            let total = amt + (amt * 0.02); 
-            document.getElementById('rzpBtnText').innerText = amt > 0 ? `Pay ₹${total.toFixed(2)} via Razorpay` : 'Pay via Razorpay';
-            let name = document.getElementById('payName').value || '';
-            let akn = document.getElementById('payAkn').value || '';
-            let narration = (akn && name) ? `${akn} - ${name}` : (name || akn || '');
-            document.getElementById('payNarration').value = narration;
-            let upiBase = "upi://pay?pa=accountree@ybl&pn=Accountree&cu=INR";
-            if(narration) upiBase += `&tn=${encodeURIComponent(narration)}`;
-            document.getElementById('btnGpay').href = upiBase;
-            document.getElementById('btnPhonePe').href = upiBase;
-            document.getElementById('btnPaytm').href = upiBase;
-            let upiQrStr = "upi://pay?pa=accountree@ybl&pn=Accountree&cu=INR";
-            if(narration) upiQrStr += `&tn=${encodeURIComponent(narration)}`;
-            document.getElementById('upiQrCode').src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(upiQrStr);
-        }
-
-        function payViaRazorpayLink() {
-            let amt = parseFloat(document.getElementById('payAmount').value) || 0; let total = amt + (amt * 0.02); 
-            let narration = document.getElementById('payNarration').value || '';
-            let url = "https://razorpay.me/@cmtaxexperts";
-            if(total > 0) { url += `?amount=${total.toFixed(2)}`; if(narration) url += `&description=${encodeURIComponent(narration)}`; }
-            window.open(url, '_blank');
-        }
-
-        function calculateCountdown() {
-            const targetDate = new Date("July 31, 2026 23:59:59").getTime();
-            const now = new Date().getTime(); 
-            let days = Math.floor((targetDate - now) / (1000 * 60 * 60 * 24)); days = days > 0 ? days : 0;
-            document.getElementById('donutDaysLeft').innerText = days;
-            const circle = document.getElementById('donutProgress');
-            const totalDaysScale = 30; const radius = 42; const circumference = 2 * Math.PI * radius; 
-            const progress = days / totalDaysScale; const safeProgress = Math.max(0, Math.min(1, progress));
-            const offset = circumference - (safeProgress * circumference);
-            setTimeout(() => { circle.style.strokeDashoffset = offset; }, 100);
-        }
-
-        let currentItrAppNo = '';
-        function whatsappITR() {
-            const text = encodeURIComponent(`Hello, I have successfully submitted my ITR Details.\n\n*Application No:* ${currentItrAppNo}\n\nPlease process this fast 🚀.`);
-            window.open(`https://wa.me/919946151111?text=${text}`, '_blank');
-        }
-
-        // ITR FORM
-        let currentStep = 1;
-        function openItrModal() { 
-            goHome(); document.getElementById('itrForm').classList.remove('hidden'); document.getElementById('itrForm').classList.add('block');
-            document.getElementById('itrModalNav').classList.remove('hidden'); document.getElementById('itrModalNav').classList.add('flex');
-            document.getElementById('itrModalFooter').classList.remove('hidden'); document.getElementById('itrModalFooter').classList.add('block');
-            document.getElementById('itrModal').classList.remove('hidden'); document.getElementById('itrModal').classList.add('flex'); 
-            showStep(1); 
-        }
-        function closeItrModal() { document.getElementById('itrModal').classList.add('hidden'); document.getElementById('itrModal').classList.remove('flex'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); document.getElementById('qrBlock').classList.add('hidden'); }
+        function closeAllModals() { document.querySelectorAll('.full-modal').forEach(m => m.classList.remove('active')); document.getElementById('qrBlock').classList.add('hidden'); }
         
-        function showStep(step) {
-            document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.add('hidden'); document.getElementById('step3').classList.add('hidden');
-            document.getElementById('step' + step).classList.remove('hidden');
-            for(let i=1; i<=3; i++) {
-                const nav = document.getElementById('navStep'+i);
-                if(i === step) { nav.classList.add('step-active'); nav.classList.remove('step-inactive'); }
-                else { nav.classList.remove('step-active'); nav.classList.add('step-inactive'); }
-            }
-            const btnBack = document.getElementById('btnBack'); const btnNext = document.getElementById('btnNext'); const btnSubmit = document.getElementById('btnSubmit');
-            if (step === 1) { btnBack.classList.add('hidden'); btnNext.classList.remove('hidden'); btnSubmit.classList.add('hidden'); }
-            else if (step === 2) { btnBack.classList.remove('hidden'); btnNext.classList.remove('hidden'); btnSubmit.classList.add('hidden'); }
-            else if (step === 3) { btnBack.classList.remove('hidden'); btnNext.classList.add('hidden'); btnSubmit.classList.remove('hidden'); }
-            currentStep = step;
+        function openMenu() { document.getElementById('sideMenu').classList.remove('hidden'); setTimeout(()=>document.getElementById('sideMenuContent').classList.remove('translate-x-full'), 10); }
+        function closeMenu() { document.getElementById('sideMenuContent').classList.add('translate-x-full'); setTimeout(()=>document.getElementById('sideMenu').classList.add('hidden'), 300); }
+        function showToast(msg, err=false) {
+            const t = document.getElementById('toast'); t.className = `toast show ${err?'error':'success'}`;
+            t.innerHTML = msg; setTimeout(()=>t.classList.remove('show'), 3000);
         }
-        function nextStep() { showStep(currentStep + 1); }
-        function prevStep() { showStep(currentStep - 1); }
 
-        function readFileAsBase64(file) {
-            return new Promise((resolve, reject) => {
+        // --- INIT DASHBOARD ---
+        function initDashboard() {
+            navigateTo('dashboard');
+            document.getElementById('welcomeName').innerText = userState.name;
+            document.getElementById('menuName').innerText = userState.name;
+            document.getElementById('menuId').innerText = userState.clientId;
+            if(userState.picture) document.getElementById('headerAvatarImg').src = userState.picture;
+
+            document.getElementById('itrName').value = userState.name;
+            if(userState.pan) document.getElementById('itrPan').value = userState.pan;
+            if(userState.mobile) document.getElementById('itrMobile').value = userState.mobile;
+            document.getElementById('itrEmail').value = userState.email;
+            
+            document.getElementById('gstName').value = userState.name;
+            if(userState.gstin) document.getElementById('gstinNo').value = userState.gstin;
+            if(userState.mobile) document.getElementById('gstMobile').value = userState.mobile;
+            document.getElementById('gstEmail').value = userState.email;
+
+            fetchDashboardData();
+        }
+
+        function fetchDashboardData() {
+            fetch(`${SCRIPT_URL}?action=GET_DASHBOARD&clientId=${encodeURIComponent(userState.clientId)}&email=${encodeURIComponent(userState.email)}`).then(r=>r.json()).then(data => {
+                globalDashboardData = data.filings || [];
+                const grid = document.getElementById('dashStatusGrid');
+                if(globalDashboardData.length === 0) {
+                    grid.innerHTML = `<div class="p-5 text-center text-sm text-gray-400 bg-gray-50 rounded-[16px] border border-gray-100">No recent filings found.</div>`;
+                } else {
+                    grid.innerHTML = globalDashboardData.slice(0, 3).map(f => buildStatusCard(f)).join('');
+                }
+            }).catch(()=> showToast("Error loading dashboard", true));
+            fetchCalendar(true);
+        }
+
+        function buildStatusCard(item) {
+            const isDue = item.Amount > 0;
+            let btnHtml = '';
+            // Small red button aligned to the right inside the flex container
+            if (isDue) btnHtml += `<button onclick="loadPaymentView('${item.AppNo}')" class="mt-2 bg-red-50 text-brand-red border border-red-100 text-[10px] font-bold py-1.5 px-3 rounded-lg shadow-sm w-fit self-end">Pay Due (₹${item.Amount})</button>`;
+
+            return `
+            <div class="bg-white p-4 rounded-[16px] shadow-sm border border-gray-100 flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="font-bold text-sm text-brand-slate leading-tight">${item.Type} - ${item.Period}</h4>
+                        <p class="text-[10px] font-mono text-gray-500 mt-1">${item.AppNo}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="text-[10px] font-bold px-2 py-1 rounded-md ${item.Status === 'Completed' ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-600 border border-gray-100'}">${item.Status}</span>
+                        ${btnHtml}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // --- WIZARDS (ITR & GST) ---
+        let currentSteps = { itr: 1, gst: 1 };
+        
+        function validateStep(module, step) {
+            const stepDiv = document.getElementById(`step-${module}-${step}`);
+            const inputs = stepDiv.querySelectorAll('input[required], select[required]');
+            for(let input of inputs) {
+                if(!input.value.trim()) {
+                    showToast(`Please fill the required fields (*).`, true);
+                    input.focus(); return false;
+                }
+            }
+            return true;
+        }
+
+        function navStep(module, dir) {
+            if (dir > 0 && !validateStep(module, currentSteps[module])) return;
+
+            document.getElementById(`step-${module}-${currentSteps[module]}`).classList.add('hidden');
+            document.getElementById(`nav-${module}-${currentSteps[module]}`).className = "w-1/3 text-center text-xs step-inactive pb-2";
+            currentSteps[module] += dir;
+            document.getElementById(`step-${module}-${currentSteps[module]}`).classList.remove('hidden');
+            document.getElementById(`nav-${module}-${currentSteps[module]}`).className = "w-1/3 text-center text-xs step-active pb-2";
+            
+            document.getElementById(`btn-${module}-back`).style.display = currentSteps[module] > 1 ? 'block' : 'none';
+            document.getElementById(`btn-${module}-next`).style.display = currentSteps[module] < 3 ? 'block' : 'none';
+            document.getElementById(`btn-${module}-submit`).style.display = currentSteps[module] === 3 ? 'block' : 'none';
+        }
+
+        async function getBase64(inputId) {
+            const file = document.getElementById(inputId).files[0];
+            if(!file) return "";
+            return new Promise((res, rej) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve({ base64: reader.result.split(',')[1], mimeType: file.type, fileName: file.name });
-                reader.onerror = error => reject(error); reader.readAsDataURL(file);
+                reader.onload = () => res({ base64: reader.result.split(',')[1], mimeType: file.type, fileName: file.name });
+                reader.onerror = error => rej(error); reader.readAsDataURL(file);
             });
         }
 
-        async function processFileInput(inputId) {
-            const fileInput = document.getElementById(inputId);
-            if (fileInput && fileInput.files.length > 0) {
-                try { return await readFileAsBase64(fileInput.files[0]); } catch(e) { return "Error Reading File"; }
-            } return null;
-        }
+        async function submitCompliance(type) {
+            if (!validateStep(type.toLowerCase(), 3)) return; 
 
-        // 3, 5. FINAL ITR SUBMIT + DUPLICATE CHECK
-        async function submitItrFinal() {
-            const btn = document.getElementById('btnSubmit'); 
-            if (btn.disabled) return;
-            
-            const nameVal = document.getElementById('s1_name').value.trim();
-            const emailVal = document.getElementById('s1_email').value.trim().toLowerCase();
-            const mobileVal = document.getElementById('s1_mobile').value.trim();
-            const panVal = document.getElementById('s1_pan').value.trim().toUpperCase();
-            const fyVal = document.getElementById('s2_fy').value;
-            const headVal = document.getElementById('s2_head').value;
-
-            // Mandatory field validation
-            if(!nameVal || !panVal || !emailVal || !mobileVal || !fyVal || !headVal) {
-                showToast("Please complete all mandatory fields (*).", true); 
-                return;
-            }
-
-            // Format validations
-            if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-                showToast("Invalid email address", true); return;
-            }
-            if(!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panVal)) {
-                showToast("Invalid PAN format (e.g., ABCDE1234F)", true); return;
-            }
-            if(!/^[6-9]\d{9}$/.test(mobileVal)) {
-                showToast("Invalid Mobile Number format", true); return;
-            }
-
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Checking Details...`;
-            btn.disabled = true; lucide.createIcons();
+            showLoader();
 
             try {
-                // Check for duplicates before uploading files
-                const checkRes = await fetch(`${SCRIPT_URL}?action=CHECK_DUPLICATE&pan=${panVal}&email=${emailVal}&mobile=${mobileVal}&fy=${fyVal}`);
-                const checkData = await checkRes.json();
-
-                if (checkData.duplicate) {
-                    alert(`Already applied for FY ${fyVal}!\nApplication No: ${checkData.appNo}\nStatus: ${checkData.status}`);
-                    btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons();
-                    return;
+                let payload = { action: "SUBMIT_COMPLIANCE", ComplianceName: type, ClientId: userState.clientId, ClientName: userState.name, Email: userState.email };
+                if (type === 'ITR') {
+                    payload.Mobile = document.getElementById('itrMobile').value;
+                    payload.PanNo = document.getElementById('itrPan').value;
+                    payload.ReturnType = document.getElementById('itrType').value;
+                    payload.Period = document.getElementById('itrAy').value;
+                    payload.BankFile = await getBase64('itrBank');
+                    payload.Form16File = await getBase64('itrForm16');
+                    payload.PnLFile = await getBase64('itrPnl');
+                    payload.OthersFile = await getBase64('itrOthers');
+                } else {
+                    payload.Mobile = document.getElementById('gstMobile').value;
+                    payload.GstNo = document.getElementById('gstinNo').value;
+                    payload.ReturnType = document.getElementById('gstType').value;
+                    payload.Period = document.getElementById('gstPeriod').value;
+                    payload.SalesFile = await getBase64('gstSales');
+                    payload.PurchaseFile = await getBase64('gstPur');
+                    payload.BankFile = await getBase64('gstBank');
+                    payload.OthersFile = await getBase64('gstOthers');
                 }
 
-                btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Submitting...`;
-                
-                const bankFile = await processFileInput('s3_bank');
-                const form16File = await processFileInput('s3_form16');
-                const pnlFile = await processFileInput('s3_pnl');
-                const othersFile = await processFileInput('s3_others');
-
-                const appNo = getNextItrAppNo();
-                currentItrAppNo = appNo;
-                
-                document.getElementById('payPan').value = panVal;
-                document.getElementById('payMobile').value = mobileVal;
-                document.getElementById('payName').value = nameVal;
-                document.getElementById('payAkn').value = appNo;
-                updatePaymentUI();
-
-                const payload = {
-                    "action": "ITR", "ApplicationNo": appNo,
-                    "Name": nameVal, "Mobile": mobileVal,
-                    "Email": emailVal, "PAN": panVal,
-                    "Password": "", "FY": fyVal,
-                    "HeadOfIncome": headVal, "BankStatementURL": bankFile,
-                    "Form16URL": form16File, "PnLURL": pnlFile, "OthersURL": othersFile,
-                    "NameOfOtherStatement": document.getElementById('s3_other_name').value.trim()
-                };
-
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' });
-                handleItrSuccess(appNo); 
-                btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons();
-
-            } catch (error) { 
-                showToast("Error submitting application.", true); 
-                btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); 
-            }
-        }
-
-        function handleItrSuccess(appNo) {
-            closeItrModal(); 
-            document.getElementById('successAppNo').innerText = appNo;
-            document.getElementById('itrSuccessModal').classList.remove('hidden');
-            document.getElementById('itrSuccessModal').classList.add('flex');
-            document.getElementById('itrForm').reset();
-            showToast(`App No: ${appNo} Submitted!`, false, true);
-            // Refresh dashboard status
-            fetchDashboardStatus();
-        }
-
-        // PAYMENT FORM SUBMIT
-        async function submitPaymentForm() {
-            const btn = document.getElementById('paySubmitBtn'); 
-            if (btn.disabled) return;
-            
-            const amt = document.getElementById('payAmount').value;
-            const name = document.getElementById('payName').value;
-            const pan = document.getElementById('payPan').value;
-            const mobile = document.getElementById('payMobile').value;
-            
-            if(!amt || !name || !pan || !mobile) {
-                showToast("Please fill all mandatory fields (*).", true); return;
-            }
-
-            const origText = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Processing...`;
-            btn.disabled = true; lucide.createIcons();
-
-            try {
-                const payProof = await processFileInput('payProof');
-                const ptrnSeq = getNextTrnNo();
-                const userAkn = document.getElementById('payAkn').value;
-                const finalAkn = userAkn ? `${ptrnSeq}/${userAkn}` : ptrnSeq;
-
-                const payload = {
-                    "action": 'PAYMENT', "Name": name, "PAN": pan, "Mobile": mobile, "AKN": finalAkn, "Amount": amt, "PaymentProof": payProof
-                };
-
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
-                    .then(() => { 
-                        closePaymentModal(); document.getElementById('successPtrnNo').innerText = finalAkn; openPaymentSuccessModal(); 
-                        btn.disabled = false; btn.innerHTML = origText; lucide.createIcons();
-                    })
-                    .catch(() => { 
-                        closePaymentModal(); document.getElementById('successPtrnNo').innerText = finalAkn; openPaymentSuccessModal(); 
-                        btn.disabled = false; btn.innerHTML = origText; lucide.createIcons();
-                    });
-            } catch(e) { showToast("Error processing payment request.", true); btn.disabled = false; btn.innerHTML = origText; lucide.createIcons(); } 
+                .then(() => {
+                    hideLoader();
+                    showToast("Application Submitted Successfully!");
+                    closeModal(`modal-${type.toLowerCase()}`);
+                    document.getElementById(`form-${type.toLowerCase()}`).reset();
+                    navStep(type.toLowerCase(), -2); 
+                    fetchDashboardData();
+                });
+            } catch(e) { hideLoader(); showToast("Upload error", true); }
         }
 
-        // UPLOAD MODAL
-        async function submitUploadModal() {
-            const btn = document.getElementById('uploadSubmitBtn');
-            if(btn.disabled) return;
-            const appNo = document.getElementById('uploadAppNo').value.trim();
-            const fileInput = document.getElementById('uploadDocFile');
-            if(!appNo || !fileInput.files.length) {
-                showToast("Please provide Application No and choose a file", true); return;
+        // --- PAYMENT LOGIC ---
+        function loadPaymentView(autoSelectAppNo = null) {
+            openModal('modal-payment');
+            const listContainer = document.getElementById('paymentDuesList');
+            document.getElementById('qrBlock').classList.add('hidden');
+            
+            const dues = globalDashboardData.filter(d => d.Amount > 0);
+            if(dues.length === 0) {
+                listContainer.innerHTML = `<div class="p-5 text-center text-sm text-gray-400 bg-gray-50 rounded-2xl border border-gray-100">No pending dues found.</div>`;
+                return;
             }
-            const origText = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Uploading...`;
-            btn.disabled = true; lucide.createIcons();
-            try {
-                const docFile = await readFileAsBase64(fileInput.files[0]);
-                const payload = { "action": "UPLOAD", "ApplicationNo": appNo, "DocumentFile": docFile };
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
-                    .then(() => { goHome(); showToast('Document Uploaded!', false, true); btn.disabled = false; btn.innerHTML = origText; lucide.createIcons(); })
-                    .catch(() => { goHome(); showToast('Document Uploaded!', false, true); btn.disabled = false; btn.innerHTML = origText; lucide.createIcons(); });
-            } catch(e) { showToast("Error uploading document", true); btn.disabled = false; btn.innerHTML = origText; lucide.createIcons(); }
+            
+            listContainer.innerHTML = dues.map(f => `
+                <div class="bg-gray-50 p-4 rounded-[16px] border border-gray-100 flex justify-between items-center">
+                    <div><h4 class="font-bold text-sm text-brand-slate">${f.Type} - ${f.Period}</h4><p class="text-[10px] font-mono text-gray-500 mt-0.5">${f.AppNo}</p></div>
+                    <button onclick="triggerQR('${f.AppNo}', '${f.Amount}')" class="bg-brand-red text-white text-[11px] font-bold px-4 py-2 rounded-lg shadow-sm shrink-0">Pay ₹${f.Amount}</button>
+                </div>
+            `).join('');
+
+            if(autoSelectAppNo) {
+                const target = dues.find(d => d.AppNo === autoSelectAppNo);
+                if(target) triggerQR(target.AppNo, target.Amount);
+            }
         }
 
-        function copyText(text) { navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard!", false, false)); }
+        function triggerQR(appNo, amount) {
+            document.getElementById('qrBlock').classList.remove('hidden');
+            document.getElementById('payDispAmount').innerText = "₹ " + amount;
+            document.getElementById('payAppNoSelected').value = appNo;
+            document.getElementById('payQrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=accountree@ybl&pn=Accountree&am=${amount}&tn=${appNo}`;
+        }
+
+        async function submitPayment() {
+            const appNo = document.getElementById('payAppNoSelected').value;
+            const proof = await getBase64('payProof');
+            if(!proof) return showToast("Upload Receipt!", true);
+            
+            showLoader();
+
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({action: "SUBMIT_PAYMENT", AKN: appNo, PaymentProof: proof, Name: userState.name, Mobile: userState.mobile, ClientId: userState.clientId, Amount: document.getElementById('payDispAmount').innerText.replace('₹ ','')}), mode: 'no-cors' })
+            .then(() => {
+                hideLoader();
+                showToast("Payment Proof Submitted!");
+                closeModal('modal-payment');
+                fetchDashboardData();
+            });
+        }
+
+        // --- LIST FETCHERS ---
+        function fetchMyFilings() {
+            document.getElementById('myFilingsList').innerHTML = `<div class="text-center py-4"><i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto text-gray-400"></i></div>`;
+            lucide.createIcons();
+            if(!globalDashboardData || globalDashboardData.length === 0) { document.getElementById('myFilingsList').innerHTML = `<p class="text-gray-400 text-sm text-center">No filings found</p>`; return; }
+            document.getElementById('myFilingsList').innerHTML = globalDashboardData.map(f => `<div class="bg-gray-50 p-4 rounded-[16px] border border-gray-100 mb-3"><div class="flex justify-between"><div><h4 class="font-bold text-brand-slate text-sm">${f.Type} - ${f.Period}</h4><p class="text-[10px] font-mono text-gray-500 mt-1">${f.AppNo}</p></div><div class="text-right flex flex-col gap-1 items-end"><span class="text-[10px] font-bold px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-600">${f.Status}</span><p class="text-[10px] text-brand-red font-bold">${f.Amount>0 ? 'Due: ₹'+f.Amount : ''}</p></div></div></div>`).join('');
+        }
+
+        function fetchTaxUpdates() {
+            fetch(`${SCRIPT_URL}?action=GET_UPDATES`).then(r=>r.json()).then(data => {
+                document.getElementById('taxUpdatesList').innerHTML = data.map(d => `<div class="bg-gray-50 p-4 rounded-[16px] border border-gray-100 mb-3"><h4 class="font-bold text-brand-slate text-sm leading-tight">${d.UpdateName}</h4><p class="text-[11px] text-gray-600 mt-2 leading-relaxed">${d.UpdateDescription}</p></div>`).join('');
+            });
+        }
+
+        function fetchCalendar(dashOnly = false) {
+            fetch(`${SCRIPT_URL}?action=GET_CALENDAR`).then(r=>r.json()).then(data => {
+                let validDates = data.filter(d => new Date(d.Date) >= new Date()).sort((a,b) => new Date(a.Date) - new Date(b.Date));
+                let html = validDates.map(d => {
+                    const days = Math.ceil((new Date(d.Date) - new Date()) / 86400000);
+                    const color = days < 30 ? '#DC2626' : '#F59E0B'; 
+                    if(dashOnly) return `<div class="bg-white p-3.5 rounded-[16px] shadow-sm border border-gray-100 flex flex-col justify-center gap-2 min-w-[140px] shrink-0"><div class="flex items-center gap-3"><div class="relative w-10 h-10 shrink-0"><svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="#f1f5f9" stroke-width="3"></circle><circle cx="18" cy="18" r="16" fill="none" stroke="${color}" stroke-width="3" stroke-dasharray="100 100" stroke-dashoffset="${100 - (Math.min(days, 100)/100*100)}"></circle></svg><div class="absolute inset-0 flex items-center justify-center font-bold text-[10px] text-brand-slate">${days}d</div></div><div><h4 class="text-xs font-bold text-brand-slate leading-tight truncate max-w-[70px]">${d.Name}</h4><p class="text-[9px] text-gray-500 mt-0.5 truncate max-w-[70px]">${d.Period}</p></div></div></div>`;
+                    return `<div class="bg-gray-50 p-4 rounded-[16px] border border-gray-100 mb-3 flex justify-between items-center"><div><h4 class="font-bold text-sm text-brand-slate">${d.Name}</h4><p class="text-[10px] text-gray-500 mt-1">${d.Period}</p></div><span class="text-brand-red font-bold text-xs">${new Date(d.Date).toLocaleDateString()}</span></div>`;
+                }).join('');
+                
+                if(dashOnly) document.getElementById('dashCalendarGrid').innerHTML = html.length > 0 ? html : '<p class="text-[11px] text-gray-400 px-2 py-4">No upcoming dates.</p>';
+                else document.getElementById('calendarList').innerHTML = html.length > 0 ? html : '<p class="text-sm text-gray-400 text-center">No upcoming dates.</p>';
+            });
+        }
     </script>
-    
+
     <!-- PWA Registration -->
-    <div id="toast" class="toast"></div>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => { console.error('PWA fail:', err); }); });
