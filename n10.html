@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CM TAXAPP - Corporate Tax & Compliance</title>
+    <link rel="icon" type="image/png" href="assets/logo-app.png">
+    <meta name="theme-color" content="#ffffff">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+    :root {
+        /* Corporate Modern Light Theme */
+        --bg-color: #F8F9FA; 
+        --surface-color: #FFFFFF;
+        
+        --text-main: #1C1E21; 
+        --text-muted: #65676B;
+        
+        --brand-red: #D32F2F; 
+        --brand-grey: #6C757D;
+        
+        --primary-color: #1C1E21; /* Sharp Dark Grey */
+        --primary-hover: #343A40;
+        
+        --primary-light: #F0F2F5; 
+        --card-pastel: #FFF5F2; /* Subtle, clean pastel */
+        
+        --border-color: #E4E6EB;
+        
+        /* Modern, crisp, tight shadows (Corporate Look) */
+        --shadow-soft: 0 2px 6px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-hover: 0 8px 24px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+        --shadow-pressed: 0 1px 2px rgba(0,0,0,0.04); 
+        --nav-shadow: 0 -2px 10px rgba(0,0,0,0.03); 
+        
+        --header-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    [data-theme="dark"] {
+        --bg-color: #121212; --surface-color: #1E1E1E; --text-main: #F8F9FA; --text-muted: #A0A3A7;
+        --primary-color: #F8F9FA; --primary-hover: #E4E6EB; --primary-light: #2A2A2A; 
+        --card-pastel: #2C2220; --border-color: #333333; --header-bg: rgba(30, 30, 30, 0.95);
+        --shadow-soft: 0 2px 8px rgba(0,0,0,0.4); --shadow-hover: 0 8px 24px rgba(0,0,0,0.6);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; transition: background-color 0.3s; }
+    .app-container { max-width: 480px; width: 100%; margin: 0 auto; min-height: 100vh; background-color: var(--bg-color); position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+
+    /* Header */
+    .header { position: fixed; top: 0; left: 0; right: 0; margin: 0 auto; width: 100%; max-width: 480px; height: 64px; background: var(--header-bg); backdrop-filter: blur(10px); padding: 0 20px; display: flex; justify-content: space-between; align-items: center; z-index: 2000; border-bottom: 1px solid var(--border-color); }
+    .header-left, .header-right { display: flex; align-items: center; gap: 8px; }
+    .header .icon-btn { background: transparent; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-main); cursor: pointer; transition: 0.2s ease; }
+    .header .icon-btn:active { transform: scale(0.95); background: var(--primary-light); }
+    .brand h2 { font-size: 16px; font-weight: 700; margin-bottom: 0; letter-spacing: 0.2px;}
+    .live-datetime { font-size: 11px; font-weight: 500; color: var(--text-muted); font-variant-numeric: tabular-nums; margin-right: 4px;}
+
+    .main-content { flex: 1; padding: 84px 0 100px; }
+    .welcome-msg { margin-bottom: 20px; padding: 0 24px; }
+    .welcome-msg h1 { font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; line-height: 1.3; }
+    .client-name { color: var(--brand-red); }
+    .welcome-msg p { font-size: 12px; color: var(--text-muted); line-height: 1.5; font-weight: 400;}
+
+    /* Global Loader */
+    #globalLoader { position: fixed; inset: 0; z-index: 9999; background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); display: none; flex-direction: column; align-items: center; justify-content: center; }
+    .loader-dots { display: flex; gap: 6px; margin-bottom: 12px; }
+    .loader-dots div { width: 10px; height: 10px; border-radius: 50%; background: var(--primary-color); animation: bounce 0.5s infinite alternate; }
+    .loader-dots div:nth-child(2) { animation-delay: 0.15s; background: var(--brand-red); }
+    .loader-dots div:nth-child(3) { animation-delay: 0.3s; background: var(--brand-grey); }
+    @keyframes bounce { to { transform: translateY(-8px); } }
+
+    /* Cards - Corporate Modern Look */
+    .services-container { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+    
+    .featured-card { 
+        background: var(--card-pastel); border-radius: 16px; padding: 24px; display: flex; justify-content: space-between; align-items: center; 
+        cursor: pointer; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); transition: all 0.2s ease; 
+    }
+    .featured-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+    .featured-card:active { transform: scale(0.98); box-shadow: var(--shadow-pressed); }
+    
+    .featured-card .card-content { flex: 1; text-align: left; }
+    .featured-card h3 { font-size: 16px; font-weight: 700; color: var(--text-main); line-height: 1.2; margin-bottom: 6px; }
+    .featured-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4; }
+    .action-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--surface-color); color: var(--brand-red); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); }
+    .featured-card .card-illustration { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.6); border-radius: 14px; border: 1px solid rgba(255,255,255,0.8); }
+    
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .dash-card { 
+        background: var(--surface-color); border-radius: 16px; padding: 20px 16px; text-align: center; 
+        border: 1px solid var(--border-color); cursor: pointer; box-shadow: var(--shadow-soft); transition: all 0.2s ease; 
+        display: flex; flex-direction: column; align-items: center; gap: 10px; 
+    }
+    .dash-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+    .dash-card:active { transform: scale(0.98); box-shadow: var(--shadow-pressed); }
+    .dash-card .icon-wrapper { width: 44px; height: 44px; border-radius: 12px; background: var(--primary-light); color: var(--primary-color); display: flex; align-items: center; justify-content: center; }
+    .dash-card h3 { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .dash-card.card-dark { background: var(--primary-color); border-color: var(--primary-color); }
+    .dash-card.card-dark .icon-wrapper { background: rgba(255,255,255,0.1); color: var(--surface-color); }
+    .dash-card.card-dark h3 { color: var(--surface-color); }
+
+    /* Bottom Nav */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; margin: 0 auto; width: 100%; max-width: 480px; background: var(--surface-color); box-shadow: var(--nav-shadow); display: flex; justify-content: space-around; align-items: center; padding: 10px 0 12px; z-index: 2000; height: 64px; border-top: 1px solid var(--border-color);}
+    .bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 500; transition: color 0.2s; cursor: pointer; flex: 1; background: transparent; border: none; font-family: 'Poppins'; }
+    .bottom-nav .nav-item i { width: 20px; height: 20px; transition: transform 0.2s; }
+    .bottom-nav .nav-item.active { color: var(--primary-color); font-weight: 600; }
+    .bottom-nav .nav-item.active i { fill: var(--primary-color); color: var(--primary-color); }
+
+    /* Modals & Forms */
+    .fs-modal { position: fixed; top: 64px; bottom: 64px; left: 0; right: 0; margin: 0 auto; width: 100%; max-width: 480px; background: var(--bg-color); z-index: 1500; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; opacity: 0; visibility: hidden; }
+    .fs-modal.active { transform: translateY(0); opacity: 1; visibility: visible; }
+    .modal-header { padding: 16px 24px; background: var(--bg-color); display: flex; align-items: center; border-bottom: 1px solid var(--border-color); }
+    .modal-header h2 { font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px; font-weight: 600; margin:0;}
+    .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 600; color: var(--secondary-color); margin-bottom: 6px; text-transform: uppercase; }
+    .form-control { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--surface-color); font-family: 'Poppins'; font-size: 13px; color: var(--text-main); transition: 0.2s; }
+    .form-control:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(28, 30, 33, 0.05); }
+    
+    .attachment-block { background: var(--surface-color); border-radius: 12px; padding: 16px; margin-bottom: 12px; position: relative; border: 1px solid var(--border-color);}
+    .upload-btn-small { display: inline-flex; align-items: center; gap: 6px; background: var(--primary-color); color: var(--surface-color); padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 500; cursor: pointer; }
+    .upload-btn-small input[type="file"] { display: none; }
+    
+    .btn-primary { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--primary-color); color: var(--surface-color); font-size: 13px; font-weight: 600; font-family: 'Poppins'; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
+    .btn-outline { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--surface-color); color: var(--text-main); font-size: 13px; font-weight: 600; font-family: 'Poppins'; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; }
+    .btn-primary:active, .btn-outline:active { transform: scale(0.98); }
+    .btn-text { background: none; border: none; color: var(--brand-red); font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Poppins'; padding: 4px 0;}
+    
+    .file-card { background: var(--surface-color); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .file-card h4 { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .file-card p { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .download-btn { background: var(--primary-light); color: var(--primary-color); padding: 8px 12px; border-radius: 8px; text-decoration: none; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 6px;}
+
+    .auth-view { display: none; }
+    .auth-view.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .divider { display: flex; align-items: center; text-align: center; margin: 24px 0; color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase;}
+    .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
+    .divider span { padding: 0 10px; }
+
+    .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%) translateY(20px); padding: 12px 20px; background: var(--primary-color); color: var(--surface-color); border-radius: 8px; font-size: 12px; font-weight: 500; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 4000; box-shadow: var(--shadow-hover); white-space: nowrap;}
+    .toast.error { background: var(--brand-red); }
+    .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<div id="globalLoader">
+    <div class="loader-dots"><div></div><div></div><div></div></div>
+    <p style="font-weight: 600; font-size: 12px; color: var(--primary-color);">Processing...</p>
+</div>
+
+<!-- Invisible Recaptcha Container for Phone Auth -->
+<div id="recaptcha-container"></div>
+
+<div class="app-container">
+    <header class="header">
+        <div class="header-left">
+            <button class="icon-btn" id="btn-back" onclick="closeAllModals()" style="display: none;">
+                <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+            </button>
+            <div class="brand">
+                <h2><span style="color: var(--brand-grey);">CM</span> <span style="color: var(--brand-red);">TAXAPP</span></h2>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="live-datetime" id="live-datetime">--:--:-- --</div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="welcome-msg">
+            <h1 id="user-greeting">Welcome, <span class="client-name">Guest</span></h1>
+            <p>Business Registrations, and Compliance workflows.</p>
+        </div>
+
+        <div class="services-container">
+            <!-- Corporate Minimal Featured Card -->
+            <div class="featured-card" onclick="openModal('it-modal')">
+                <div class="card-content">
+                    <h3>Ready to<br>File your first<br>Income Tax</h3>
+                    <p>Regain Your Financial<br>Peace</p>
+                    <div class="action-pill"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> 05 mins</div>
+                </div>
+                <div class="card-illustration"><i data-lucide="file-bar-chart-2"></i></div>
+            </div>
+
+            <!-- Corporate Minimal Grid -->
+            <div class="dashboard-grid">
+                <div class="dash-card" onclick="openModal('gst-modal')">
+                    <div class="icon-wrapper"><i data-lucide="receipt"></i></div><h3>GST Filing</h3>
+                </div>
+                <div class="dash-card" onclick="openModal('dues-modal')">
+                    <div class="icon-wrapper"><i data-lucide="alert-circle"></i></div><h3>Pending Dues</h3>
+                </div>
+                <div class="dash-card card-dark" onclick="openModal('calendar-modal')">
+                    <div class="icon-wrapper"><i data-lucide="calendar-days"></i></div><h3>Calendar</h3>
+                </div>
+                <div class="dash-card card-dark" onclick="openModal('about-modal')">
+                    <div class="icon-wrapper"><i data-lucide="info"></i></div><h3>About App</h3>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <button onclick="closeAllModals(); setActiveNav(this)" class="nav-item active" id="nav-home">
+            <i data-lucide="home"></i><span>Home</span>
+        </button>
+        <button onclick="openModal('dues-modal'); setActiveNav(this)" class="nav-item">
+            <i data-lucide="bell"></i><span>Alerts</span>
+        </button>
+        <button onclick="openModal('files-modal'); setActiveNav(this)" class="nav-item">
+            <i data-lucide="folder"></i><span>Files</span>
+        </button>
+        <button onclick="openModal('auth-modal'); setActiveNav(this)" class="nav-item">
+            <i data-lucide="user"></i><span>Profile</span>
+        </button>
+    </nav>
+</div>
+
+<!-- ALL-IN-ONE AUTHENTICATION MODAL -->
+<div class="fs-modal" id="auth-modal">
+    <div class="modal-header"><h2>Account Access</h2></div>
+    <div class="modal-body">
+        
+        <!-- Logged In View -->
+        <div id="auth-logged-in" class="auth-view" style="text-align: center; padding-top: 20px;">
+            <div style="width: 64px; height: 64px; background: var(--primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <i data-lucide="user" style="width: 32px; height: 32px; color: var(--primary-color);"></i>
+            </div>
+            <h3 class="client-name" style="font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--text-main);">Client</h3>
+            <p id="profile-email" style="font-size: 12px; color: var(--text-muted); margin-bottom: 30px;">email@domain.com</p>
+            <button class="btn-outline" id="btn-logout" style="color: var(--brand-red); border-color: var(--border-color);"><i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Sign Out</button>
+        </div>
+
+        <!-- Email/Password Login View -->
+        <div id="auth-email-login" class="auth-view active">
+            <form id="form-login">
+                <div class="form-group"><label>Email Address</label><input type="email" id="login-email" class="form-control" required placeholder="name@company.com"></div>
+                <div class="form-group"><label>Password</label><input type="password" id="login-password" class="form-control" required placeholder="••••••••"></div>
+                <div style="text-align: right; margin-top: -8px; margin-bottom: 16px;">
+                    <button type="button" class="btn-text" onclick="showAuthView('auth-forgot')">Forgot Password?</button>
+                </div>
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
+            
+            <div class="divider"><span>Or continue with</span></div>
+            
+            <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                <button type="button" class="btn-outline" id="btn-google-login" style="flex: 1;">
+                    <i class="fa-brands fa-google" style="color: #DB4437;"></i> Google
+                </button>
+                <button type="button" class="btn-outline" onclick="showAuthView('auth-phone')" style="flex: 1;">
+                    <i data-lucide="smartphone" style="width: 16px; height: 16px;"></i> Mobile
+                </button>
+            </div>
+
+            <p style="text-align: center; font-size: 12px; color: var(--text-muted);">
+                New to CM TAXAPP? <button type="button" class="btn-text" style="color: var(--primary-color);" onclick="showAuthView('auth-signup')">Create an account</button>
+            </p>
+        </div>
+
+        <!-- Sign Up View -->
+        <div id="auth-signup" class="auth-view">
+            <form id="form-signup">
+                <div class="form-group"><label>Full Name / Business</label><input type="text" id="reg-name" class="form-control" required placeholder="John Doe"></div>
+                <div class="form-group"><label>Email Address</label><input type="email" id="reg-email" class="form-control" required placeholder="name@company.com"></div>
+                <div class="form-group"><label>Create Password</label><input type="password" id="reg-password" class="form-control" required placeholder="••••••••"></div>
+                <button type="submit" class="btn-primary" style="margin-top: 16px;">Sign Up</button>
+            </form>
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="button" class="btn-text" style="color: var(--text-muted);" onclick="showAuthView('auth-email-login')"><i data-lucide="arrow-left" style="width: 12px; height:12px; display:inline; vertical-align:middle;"></i> Back to Login</button>
+            </div>
+        </div>
+
+        <!-- Forgot Password View -->
+        <div id="auth-forgot" class="auth-view">
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Enter your email address to receive a password reset link.</p>
+            <form id="form-forgot">
+                <div class="form-group"><label>Email Address</label><input type="email" id="forgot-email" class="form-control" required placeholder="name@company.com"></div>
+                <button type="submit" class="btn-primary">Send Reset Link</button>
+            </form>
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="button" class="btn-text" style="color: var(--text-muted);" onclick="showAuthView('auth-email-login')"><i data-lucide="arrow-left" style="width: 12px; height:12px; display:inline; vertical-align:middle;"></i> Back to Login</button>
+            </div>
+        </div>
+
+        <!-- Phone Number OTP View -->
+        <div id="auth-phone" class="auth-view">
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Enter your mobile number with country code to receive an OTP.</p>
+            <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="tel" id="phone-number" class="form-control" placeholder="+91 9999999999">
+            </div>
+            <button type="button" class="btn-primary" id="btn-send-otp">Send OTP</button>
+
+            <div id="otp-group" style="display: none; margin-top: 20px;">
+                <div class="form-group">
+                    <label>Enter 6-Digit OTP</label>
+                    <input type="number" id="otp-code" class="form-control" placeholder="123456">
+                </div>
+                <button type="button" class="btn-primary" id="btn-verify-otp">Verify OTP</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="button" class="btn-text" style="color: var(--text-muted);" onclick="showAuthView('auth-email-login')"><i data-lucide="arrow-left" style="width: 12px; height:12px; display:inline; vertical-align:middle;"></i> Back to Email Login</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- GST Filing Modal -->
+<div class="fs-modal" id="gst-modal">
+    <div class="modal-header"><h2>GST Returns</h2></div>
+    <div class="modal-body">
+        <form id="form-gst-submit">
+            <div class="form-group">
+                <label>Period *</label>
+                <select class="form-control" id="gst-period" required>
+                    <option value="" disabled selected>Select Filing Period...</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Q1">Quarter 1 (Apr - Jun)</option>
+                    <option value="Annual">Annual Return</option>
+                </select>
+            </div>
+            <div style="margin: 24px 0 12px; font-size: 11px; font-weight: 600; color: var(--secondary-color); text-transform: uppercase;">Upload Statements</div>
+            <div class="attachment-block">
+                <div class="form-group"><label style="margin-bottom: 4px;">Statement File *</label></div>
+                <label class="upload-btn-small">
+                    <i data-lucide="upload-cloud" style="width: 14px; height: 14px;"></i> <span class="file-label">Select File</span>
+                    <input type="file" id="gst-file" required onchange="updateSmallFileLabel(this)">
+                </label>
+            </div>
+            <button type="submit" class="btn-primary" style="margin-top: 20px;">Submit GST</button>
+        </form>
+    </div>
+</div>
+
+<!-- Income Tax Filing Modal -->
+<div class="fs-modal" id="it-modal">
+    <div class="modal-header"><h2>Income Tax Return</h2></div>
+    <div class="modal-body">
+        <form id="form-it-submit">
+            <div class="form-group">
+                <label>Assessment Year *</label>
+                <select class="form-control" id="it-period" required>
+                    <option value="" disabled selected>Select Year...</option>
+                    <option value="AY 2026-27">AY 2026-27</option>
+                    <option value="AY 2025-26">AY 2025-26</option>
+                </select>
+            </div>
+            <div style="margin: 24px 0 12px; font-size: 11px; font-weight: 600; color: var(--secondary-color); text-transform: uppercase;">Upload Documents</div>
+            <div class="attachment-block">
+                <div class="form-group"><label style="margin-bottom: 4px;">Bank Stmt / Form 16 *</label></div>
+                <label class="upload-btn-small">
+                    <i data-lucide="upload-cloud" style="width: 14px; height: 14px;"></i> <span class="file-label">Select File</span>
+                    <input type="file" id="it-file" required onchange="updateSmallFileLabel(this)">
+                </label>
+            </div>
+            <button type="submit" class="btn-primary" style="margin-top: 20px;">Submit ITR</button>
+        </form>
+    </div>
+</div>
+
+<!-- Files Modal -->
+<div class="fs-modal" id="files-modal">
+    <div class="modal-header"><h2>My Documents</h2></div>
+    <div class="modal-body" id="files-list-container">
+        <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <i data-lucide="folder-search" style="width: 32px; height: 32px; margin-bottom: 12px; color: var(--border-color);"></i>
+            <p style="font-size: 12px;">Please login to view your files.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Other Placeholders -->
+<div class="fs-modal" id="dues-modal"><div class="modal-header"><h2>Pending Dues</h2></div><div class="modal-body"><div style="text-align: center; padding: 60px 20px; color: var(--text-muted);"><div style="width: 64px; height: 64px; background: var(--primary-light); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;"><i data-lucide="check" style="width: 32px; height: 32px; color: var(--primary-color);"></i></div><h3 style="color: var(--text-main); font-size: 16px; margin-bottom: 4px;">All Clear</h3><p style="font-size: 12px;">No pending dues.</p></div></div></div>
+<div class="fs-modal" id="calendar-modal"><div class="modal-header"><h2>Calendar</h2></div><div class="modal-body"><div style="border-radius: 12px; border: 1px solid var(--border-color); background: var(--surface-color); padding: 20px; text-align: center;"><p style="font-size: 12px; color: var(--text-muted);">Syncing upcoming due dates...</p></div></div></div>
+<div class="fs-modal" id="about-modal"><div class="modal-header"><h2>About App</h2></div><div class="modal-body" style="text-align: center; padding-top: 40px;"><h3 style="font-size: 18px; font-weight: 700; color: var(--primary-color);"><span style="color:var(--brand-grey)">CM</span> <span style="color:var(--brand-red)">TAXAPP</span></h3><p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Corporate Tax Portal</p><p style="font-size: 10px; margin-top:20px; color: var(--border-color);">v1.0</p></div></div>
+
+<div id="toast" class="toast"></div>
+
+<!-- UI Scripts -->
+<script>
+    window.lucide.createIcons();
+
+    window.showToast = (msg, type = 'success') => {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg; toast.className = `toast ${type} show`;
+        setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    };
+    window.showLoader = () => document.getElementById('globalLoader').style.display = 'flex';
+    window.hideLoader = () => document.getElementById('globalLoader').style.display = 'none';
+
+    function updateClock() {
+        const now = new Date(); let hours = now.getHours(), minutes = now.getMinutes(), ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12; hours = hours ? hours : 12; minutes = minutes < 10 ? '0' + minutes : minutes;
+        const dtElem = document.getElementById('live-datetime');
+        if (dtElem) dtElem.innerText = hours + ':' + minutes + ' ' + ampm;
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    window.openModal = (modalId) => {
+        closeAllModals(true);
+        if(modalId !== 'dashboard') {
+            document.getElementById(modalId).classList.add('active');
+            document.getElementById('btn-back').style.display = 'flex';
+        }
+    };
+    window.closeAllModals = (isOpening = false) => {
+        document.querySelectorAll('.fs-modal').forEach(m => m.classList.remove('active'));
+        if (!isOpening) {
+            document.getElementById('btn-back').style.display = 'none';
+            setActiveNav(document.getElementById('nav-home'));
+        }
+    };
+    window.setActiveNav = (element) => {
+        if(!element) return;
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        element.classList.add('active'); window.lucide.createIcons();
+    };
+
+    // Toggle different Auth Views within the Auth Modal
+    window.showAuthView = (viewId) => {
+        document.querySelectorAll('.auth-view').forEach(el => {
+            el.classList.remove('active');
+            setTimeout(() => el.style.display = 'none', 50); // slight delay for smooth transition
+        });
+        setTimeout(() => {
+            const target = document.getElementById(viewId);
+            if(target) {
+                target.style.display = 'block';
+                setTimeout(() => target.classList.add('active'), 10);
+            }
+        }, 50);
+    };
+
+    window.updateSmallFileLabel = (input) => {
+        const labelSpan = input.previousElementSibling; const icon = labelSpan.previousElementSibling;
+        if(input.files && input.files.length > 0) {
+            labelSpan.innerText = input.files[0].name.substring(0, 15) + '...';
+            input.parentElement.style.background = 'var(--primary-hover)';
+            icon.setAttribute('data-lucide', 'check-circle');
+        } else {
+            labelSpan.innerText = 'Select File';
+            input.parentElement.style.background = 'var(--primary-color)';
+            icon.setAttribute('data-lucide', 'upload-cloud');
+        }
+        window.lucide.createIcons();
+    };
+</script>
+
+<!-- Firebase Auth & Modules -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs, doc, setDoc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDGaJ712J-XVIntrLUUH_6FGB3s4Azbo-c",
+      authDomain: "taxapp-503821.firebaseapp.com",
+      projectId: "taxapp-503821",
+      storageBucket: "taxapp-503821.firebasestorage.app",
+      messagingSenderId: "753272952222",
+      appId: "1:753272952222:web:a09c1bf1d7a3dcad52b28f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    let currentUserRole = 'client'; 
+    let currentUserData = null;
+
+    // --- EMAIL/PASSWORD SIGN UP ---
+    document.getElementById('form-signup').addEventListener('submit', async (e) => {
+        e.preventDefault(); window.showLoader();
+        const name = document.getElementById('reg-name').value;
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+
+        try {
+            const userCred = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(userCred.user, { displayName: name });
+            await setDoc(doc(db, "users", userCred.user.uid), { name, email, role: 'client', branchId: 'HQ', createdAt: new Date().toISOString() });
+            window.hideLoader(); window.showToast("Account Created!", "success"); window.closeAllModals();
+        } catch (error) { window.hideLoader(); window.showToast(error.message, "error"); }
+    });
+
+    // --- EMAIL/PASSWORD LOGIN ---
+    document.getElementById('form-login').addEventListener('submit', async (e) => {
+        e.preventDefault(); window.showLoader();
+        try {
+            await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value);
+            window.hideLoader(); window.showToast("Logged in successfully!", "success"); window.closeAllModals();
+        } catch (error) { window.hideLoader(); window.showToast("Invalid credentials.", "error"); }
+    });
+
+    // --- GOOGLE AUTH ---
+    document.getElementById('btn-google-login').addEventListener('click', () => {
+        signInWithPopup(auth, googleProvider).then(async (result) => {
+            const user = result.user;
+            // Check if user doc exists, if not create it
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if(!userDoc.exists()) {
+                await setDoc(doc(db, "users", user.uid), { name: user.displayName, email: user.email, role: 'client', branchId: 'HQ', createdAt: new Date().toISOString() });
+            }
+            window.showToast("Logged in with Google!", "success"); window.closeAllModals();
+        }).catch((err) => window.showToast(err.message, "error"));
+    });
+
+    // --- FORGOT PASSWORD ---
+    document.getElementById('form-forgot').addEventListener('submit', (e) => {
+        e.preventDefault(); window.showLoader();
+        const email = document.getElementById('forgot-email').value;
+        sendPasswordResetEmail(auth, email).then(() => {
+            window.hideLoader(); window.showToast("Password reset link sent!", "success");
+            window.showAuthView('auth-email-login'); // go back to login
+            document.getElementById('form-forgot').reset();
+        }).catch((error) => { window.hideLoader(); window.showToast(error.message, "error"); });
+    });
+
+    // --- PHONE OTP AUTH ---
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+
+    document.getElementById('btn-send-otp').addEventListener('click', () => {
+        const phone = document.getElementById('phone-number').value;
+        if(!phone) { window.showToast("Enter a valid phone number with country code", "error"); return; }
+        window.showLoader();
+        signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
+            .then((confirmationResult) => {
+                window.confirmationResult = confirmationResult;
+                window.hideLoader(); window.showToast("OTP Sent to " + phone, "success");
+                document.getElementById('btn-send-otp').style.display = 'none';
+                document.getElementById('otp-group').style.display = 'block';
+            }).catch((error) => { window.hideLoader(); window.showToast(error.message, "error"); window.recaptchaVerifier.render().then(w => w.reset()); });
+    });
+
+    document.getElementById('btn-verify-otp').addEventListener('click', () => {
+        const code = document.getElementById('otp-code').value;
+        window.showLoader();
+        window.confirmationResult.confirm(code).then(async (result) => {
+            const user = result.user;
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if(!userDoc.exists()) {
+                await setDoc(doc(db, "users", user.uid), { phone: user.phoneNumber, role: 'client', branchId: 'HQ', createdAt: new Date().toISOString() });
+            }
+            window.hideLoader(); window.showToast("Phone verified successfully!", "success"); window.closeAllModals();
+            document.getElementById('otp-group').style.display = 'none'; document.getElementById('btn-send-otp').style.display = 'block'; document.getElementById('phone-number').value=''; document.getElementById('otp-code').value='';
+        }).catch((error) => { window.hideLoader(); window.showToast("Invalid OTP code.", "error"); });
+    });
+
+    // --- LOGOUT ---
+    document.getElementById('btn-logout').addEventListener('click', () => {
+        signOut(auth).then(() => { window.showToast("Logged out.", "success"); window.closeAllModals(); document.getElementById('files-list-container').innerHTML = '';});
+    });
+
+    // --- AUTH STATE OBSERVER ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUserData = user;
+            const displayName = user.displayName || user.phoneNumber || "Client";
+            document.querySelectorAll('.client-name').forEach(el => el.innerText = displayName);
+            document.getElementById('profile-email').innerText = user.email || user.phoneNumber || "Verified User";
+            window.showAuthView('auth-logged-in'); // Show profile view in modal
+
+            // Fetch Role
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if(userDoc.exists()) currentUserRole = userDoc.data().role || 'client';
+            fetchUserFiles();
+        } else {
+            currentUserData = null; currentUserRole = 'client';
+            document.querySelectorAll('.client-name').forEach(el => el.innerText = "Guest");
+            window.showAuthView('auth-email-login'); // Reset to login view
+            document.getElementById('files-list-container').innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);"><p style="font-size:12px;">Please login to view files.</p></div>';
+        }
+    });
+
+    // --- FILE UPLOAD & FIRESTORE SAVE ---
+    async function handleFormSubmit(type, periodId, fileId) {
+        if(!currentUserData) { window.showToast("Please login first!", "error"); openModal('auth-modal'); return; }
+        
+        const file = document.getElementById(fileId).files[0];
+        const period = document.getElementById(periodId).value;
+        if(!file || !period) { window.showToast("Please fill all fields.", "error"); return; }
+
+        window.showLoader();
+        try {
+            const storageRef = ref(storage, `uploads/${currentUserData.uid}/${type}_${Date.now()}_${file.name}`);
+            const snapshot = await uploadBytesResumable(storageRef, file);
+            const downloadUrl = await getDownloadURL(snapshot.ref);
+
+            await addDoc(collection(db, "compliance"), {
+                type: type, period: period, email: currentUserData.email || currentUserData.phoneNumber, uid: currentUserData.uid,
+                status: "Processing", fileName: file.name, fileUrl: downloadUrl,
+                branchId: "HQ", createdAt: new Date().toISOString()
+            });
+
+            window.hideLoader(); window.showToast(`${type} Submitted Successfully!`, "success");
+            window.closeAllModals(); fetchUserFiles();
+            document.getElementById('form-gst-submit').reset(); document.getElementById('form-it-submit').reset();
+            document.querySelectorAll('.file-label').forEach(el => { el.innerText = "Select File"; el.parentElement.style.background = "var(--primary-color)"; });
+        } catch (e) { window.hideLoader(); window.showToast(e.message, "error"); }
+    }
+
+    document.getElementById('form-gst-submit').addEventListener('submit', (e) => { e.preventDefault(); handleFormSubmit('GST', 'gst-period', 'gst-file'); });
+    document.getElementById('form-it-submit').addEventListener('submit', (e) => { e.preventDefault(); handleFormSubmit('ITR', 'it-period', 'it-file'); });
+
+    // --- FETCH DATA FOR FILES TAB ---
+    async function fetchUserFiles() {
+        if(!currentUserData) return;
+        const container = document.getElementById('files-list-container');
+        container.innerHTML = '<div style="text-align:center; padding:40px;"><div class="loader-dots" style="justify-content:center;"><div></div><div></div><div></div></div></div>';
+
+        try {
+            let q;
+            if(currentUserRole === 'admin') { q = query(collection(db, "compliance"), orderBy("createdAt", "desc")); } 
+            else { q = query(collection(db, "compliance"), where("uid", "==", currentUserData.uid)); }
+
+            const querySnapshot = await getDocs(q);
+            if(querySnapshot.empty) {
+                container.innerHTML = '<div style="text-align:center; padding:40px;"><p style="font-size:12px; color:var(--text-muted);">No documents uploaded yet.</p></div>';
+                return;
+            }
+
+            let html = '';
+            querySnapshot.forEach((doc) => {
+                const data = doc.data(); const date = new Date(data.createdAt).toLocaleDateString();
+                html += `
+                <div class="file-card">
+                    <div><h4 style="margin-bottom:2px;">${data.type} - ${data.period}</h4><p style="font-size:10px;">${data.status} • ${date}</p></div>
+                    <a href="${data.fileUrl}" target="_blank" class="download-btn"><i data-lucide="download" style="width:12px; height:12px;"></i> View</a>
+                </div>`;
+            });
+            container.innerHTML = html; window.lucide.createIcons();
+        } catch(e) { console.error(e); container.innerHTML = '<p style="text-align:center;font-size:12px;">Error loading files.</p>'; }
+    }
+</script>
+
+</body>
+</html>
