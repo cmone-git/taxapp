@@ -18,13 +18,18 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: { sans: ['Popins', 'sans-serif'] },
                     colors: {
                         brand: { yellow: '#F59E0B', red: '#DC2626', slate: '#1e2235', bg: '#F8FAFC' }
                     },
                     boxShadow: {
-                        'projected': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 4px 4px 0px 0px rgba(226, 232, 240, 1)',
-                        'projected-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 6px 6px 0px 0px rgba(203, 213, 225, 1)'
+  'projected': `
+    0 10px 30px rgba(15,23,42,.06),
+    0 3px 8px rgba(15,23,42,.04)
+  `,
+  'projected-hover': `
+    0 18px 40px rgba(15,23,42,.10),
+    0 8px 18px rgba(15,23,42,.06)`
                     }
                 }
             }
